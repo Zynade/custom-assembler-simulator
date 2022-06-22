@@ -1,0 +1,27 @@
+{
+  "name": "custom-assembler-simulator",
+  "version": "1.0.0",
+  "description": "A custom assembler and simulator for a custom ISA, written in JavaScript and powered by Node.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zynade/custom-assembler-simulator.git"
+  },
+  "author": "Atharv, Dev, Naman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Zynade/custom-assembler-simulator/issues"
+  },
+  "homepage": "https://github.com/Zynade/custom-assembler-simulator#readme",
+  "devDependencies": {
+    "eslint": "^8.18.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.2.3",
+    "eslint-plugin-promise": "^6.0.0",
+    "jest": "^28.1.1"
+  }
+}

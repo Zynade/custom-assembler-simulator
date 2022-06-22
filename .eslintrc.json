@@ -1,0 +1,17 @@
+{
+    "env": {
+        "browser": true,
+        // "commonjs": true, // Either this OR the "sourceType": "module" are required
+        "es2021": true,
+        "jest": true
+    },
+    "extends": [
+        "standard"
+    ],
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    "rules": {
+    }
+}
