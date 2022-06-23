@@ -1,4 +1,3 @@
-
 function main (instruction) {
   instruction = instruction.split(' ')
   let binary = ''
@@ -13,7 +12,7 @@ function main (instruction) {
   }
   for (let i = 1; i < instruction.length - 1; i++) {
     if (!registers[instruction[i]]) {
-      binary += instruction[i]
+      binary += registers[instruction[i]]
     } else {
       // TODO raise error
     }

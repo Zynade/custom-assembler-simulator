@@ -28,4 +28,6 @@ function verifyTypeF (instruction) {
   return -1
 }
 
+// Todo need to add cmp and mov verification
+
 module.exports = { verifyTypeA, verifyTypeB, verifyTypeC, verifyTypeD, verifyTypeE, verifyTypeF }
