@@ -32,7 +32,7 @@ test('Verfying valid TypeA reg using: mul reg0 reg1 reg2', () => {
 })
 
 test('Verfying invalid TypeA reg using: mul reg0 reg1', () => {
-  expect(main.verifyTypeA(['mul', 'Rq0', 'R1'])).toBe(-1)
+  expect(main.verifyTypeA(['mul', 'R0', 'R1'])).toBe(-1)
 })
 
 test('Verfying invalid TypeA reg using: mul reg0 reg1 $30', () => {

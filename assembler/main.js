@@ -1,12 +1,17 @@
 function verifyTypeA (instruction) {
+  if (instruction.length === 4 && instruction[3][0] === 'R') {
+    return 0
+  }
   return -1
 }
 
 function verifyTypeB (instruction) {
+  if (instruction.length === 3 && instruction[2][0] === '$') {
+    return 0
+  }
   return -1
 }
 
-<<<<<<< HEAD
 function verifyTypeC (array) {
   return -1
 }
@@ -24,6 +29,3 @@ function verifyTypeF (instruction) {
 }
 
 module.exports = { verifyTypeA, verifyTypeB, verifyTypeC, verifyTypeD, verifyTypeE, verifyTypeF }
-=======
-module.exports = { verifyTypeA, verifyTypeB }
->>>>>>> b3d6e17 (Added test cases for Type A and Type B Opcode)
