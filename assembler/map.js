@@ -15,50 +15,50 @@ const registers = {
 const opcode = {
   add: {
     verify: (instruction) => {
-      verification.verifyTypeA(instruction)
+      return verification.verifyTypeA(instruction)
     },
     binaryeq: ['1000000']
   },
   sub: {
     verify: (instruction) => {
-      verification.verifyTypeA(instruction)
+      return verification.verifyTypeA(instruction)
     },
     binaryeq: ['1000100']
   },
-  mult: {
+  mul: {
     verify: (instruction) => {
-      verification.verifyTypeA(instruction)
+      return verification.verifyTypeA(instruction)
     },
     binaryeq: ['1011000']
   },
   rs: {
     verify: (instruction) => {
-      verification.verifyTypeB(instruction)
+      return verification.verifyTypeB(instruction)
     },
     binaryeq: ['1100000']
   },
   ls: {
     verify: (instruction) => {
-      verification.verifyTypeB(instruction)
+      return verification.verifyTypeB(instruction)
     },
     binaryeq: ['1100100']
   },
 
   xor: {
     verify: (instruction) => {
-      verification.verifyTypeA(instruction)
+      return verification.verifyTypeA(instruction)
     },
     binaryeq: ['1101000']
   },
   or: {
     verify: (instruction) => {
-      verification.verifyTypeA(instruction)
+      return verification.verifyTypeA(instruction)
     },
     binaryeq: ['1101100']
   },
   and: {
     verify: (instruction) => {
-      verification.verifyTypeA(instruction)
+      return verification.verifyTypeA(instruction)
     },
     binaryeq: ['1110000']
   }
@@ -70,7 +70,23 @@ const opcode = {
 
 // temp function for testing
 function dicttemp (regist) {
-  return registers[regist]
+  const tmp = registers[regist]
+  return tmp
 }
 
-module.exports = { opcode, registers, dicttemp }
+function optest (instruction) {
+  instruction = instruction.split(' ')
+  const tmp = opcode[instruction[0]]
+  if (!tmp) {
+    return -1
+  }
+  //   console.log(tmp.verify(instruction))
+  if (tmp.verify(instruction) > -1) {
+    return opcode[instruction[0]].binaryeq[tmp.verify(instruction)]
+  }
+  return -1
+}
+
+optest('add R1 R2 R3')
+
+module.exports = { opcode, registers, dicttemp, optest }
