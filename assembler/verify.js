@@ -11,7 +11,21 @@ function verifyTypeB (instruction) {
   }
   return -1
 }
-
+function verifyCmp (instruction) {
+  if (instruction.length === 3) {
+    return 0
+  }
+  return -1
+}
+function verifyMove (instruction) {
+  if (instruction.length === 3 && instruction[2][0] === '$') {
+    return 1
+  }
+  else if(instruction.length === 3){
+    return 0
+  }
+  return -1
+}
 function verifyTypeC (array) {
   return -1
 }
