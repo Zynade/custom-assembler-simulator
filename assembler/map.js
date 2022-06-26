@@ -61,8 +61,21 @@ const opcode = {
       return verification.verifyTypeA(instruction)
     },
     binaryeq: ['1110000']
+  },
+  mov:{
+    verify: (instruction) => {
+    return verification.verifyMov(instruction)
+    },
+    binaryeq: verify==1?['1001000']:['1001100']  
+  //if verify returns 1 then it's a immediate instruction set, 0 for register,
+  //-1 for wrong instruction
+  },
+  cmp:{
+    verify: (instruction) => {
+    return verification.verifyCmp(instruction)
+    },
+  binaryeq: ['1111000']
   }
-
 }
 
 // Todo need to make memory space object . Also raise error if the memory space added is a keyword

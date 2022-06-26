@@ -11,11 +11,21 @@ function verifyTypeB (instruction) {
   }
   return -1
 }
-
-function verifyTypeC (array) {
+function verifyTypeC (instruction) {
+  if (instruction.length === 3) {
+    return 0
+  }
   return -1
 }
-
+function verifyMove (instruction) {
+  if (instruction.length === 3 && instruction[2][0] === '$') {
+    return 1
+  }
+  else if(instruction.length === 3){
+    return 0
+  }
+  return -1
+}
 function verifyTypeD (array) {
   return -1
 }
@@ -30,4 +40,4 @@ function verifyTypeF (instruction) {
 
 // Todo need to add cmp and mov verification
 
-module.exports = { verifyTypeA, verifyTypeB, verifyTypeC, verifyTypeD, verifyTypeE, verifyTypeF }
+module.exports = { verifyTypeA, verifyTypeB, verifyTypeC, verifyTypeD, verifyTypeE, verifyTypeF,verifyMove }
