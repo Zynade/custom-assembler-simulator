@@ -11,70 +11,94 @@ const registers = {
   R6: '110'
 }
 
-// Todo need to complete opcode
 const opcode = {
+  // Type A instructions:
   add: {
-    verify: (instruction) => {
-      return verification.verifyTypeA(instruction)
-    },
+    verify: (instruction) => verification.verifyTypeA(instruction),
     binaryeq: ['1000000']
   },
   sub: {
-    verify: (instruction) => {
-      return verification.verifyTypeA(instruction)
-    },
+    verify: (instruction) => verification.verifyTypeA(instruction),
     binaryeq: ['1000100']
   },
   mul: {
-    verify: (instruction) => {
-      return verification.verifyTypeA(instruction)
-    },
+    verify: (instruction) => verification.verifyTypeA(instruction),
     binaryeq: ['1011000']
   },
-  rs: {
-    verify: (instruction) => {
-      return verification.verifyTypeB(instruction)
-    },
-    binaryeq: ['1100000']
-  },
-  ls: {
-    verify: (instruction) => {
-      return verification.verifyTypeB(instruction)
-    },
-    binaryeq: ['1100100']
-  },
-
   xor: {
-    verify: (instruction) => {
-      return verification.verifyTypeA(instruction)
-    },
+    verify: (instruction) => verification.verifyTypeA(instruction),
     binaryeq: ['1101000']
   },
   or: {
-    verify: (instruction) => {
-      return verification.verifyTypeA(instruction)
-    },
+    verify: (instruction) => verification.verifyTypeA(instruction),
     binaryeq: ['1101100']
   },
   and: {
-    verify: (instruction) => {
-      return verification.verifyTypeA(instruction)
-    },
+    verify: (instruction) => verification.verifyTypeA(instruction),
     binaryeq: ['1110000']
   },
+
+  // Type B instructions:
   mov: {
-    verify: (instruction) => {
-      return verification.verifyMov(instruction)
-    },
-    binaryeq: (verify) => verify === 1 ? ['1001000'] : ['1001100']
-  // if verify returns 1 then it's a immediate instruction set, 0 for register,
-  // -1 for wrong instruction.
+    // If verify returns 1 then it's a immediate instruction set, 0 for register, 1 for wrong instruction.
+    verify: (instruction) => verification.verifyMov(instruction),
+    binaryeq: (verify) => verify === 1 ? ['10010'] : ['1001100000']
+  },
+  rs: {
+    verify: (instruction) => verification.verifyTypeB(instruction),
+    binaryeq: ['11000']
+  },
+  ls: {
+    verify: (instruction) => verification.verifyTypeB(instruction),
+    binaryeq: ['11001']
+  },
+
+  // Type C instructions:
+  div: {
+    verify: (instruction) => verification.verifyTypeC(instruction),
+    binaryeq: ['1011100000']
+  },
+  not: {
+    verify: (instruction) => verification.verifyTypeC(instruction),
+    binaryeq: ['1110100000']
   },
   cmp: {
-    verify: (instruction) => {
-      return verification.verifyCmp(instruction)
-    },
-    binaryeq: ['1111000']
+    verify: (instruction) => verification.verifyTypeC(instruction),
+    binaryeq: ['1111000000']
+  },
+
+  // Type D instructions:
+  ld: {
+    verify: (instruction) => verification.verifyTypeD(instruction),
+    binaryeq: ['10100']
+  },
+  st: {
+    verify: (instruction) => verification.verifyTypeD(instruction),
+    binaryeq: ['10101']
+  },
+
+  // Type E instructions:
+  jmp: {
+    verify: (instruction) => verification.verifyTypeE(instruction),
+    binaryeq: ['11111000']
+  },
+  jlt: {
+    verify: (instruction) => verification.verifyTypeE(instruction),
+    binaryeq: ['01100000']
+  },
+  jgt: {
+    verify: (instruction) => verification.verifyTypeE(instruction),
+    binaryeq: ['01101000']
+  },
+  je: {
+    verify: (instruction) => verification.verifyTypeE(instruction),
+    binaryeq: ['01111000']
+  },
+
+  // Type F instructions
+  hlt: {
+    verify: (instruction) => verification.verifyTypeF(instruction),
+    binaryeq: ['0101000000000000']
   }
 }
 
