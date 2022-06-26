@@ -62,19 +62,19 @@ const opcode = {
     },
     binaryeq: ['1110000']
   },
-  mov:{
+  mov: {
     verify: (instruction) => {
       return verification.verifyMov(instruction)
     },
-    binaryeq: (verify) => verify === 1 ? ['1001000'] : ['1001100']  
+    binaryeq: (verify) => verify === 1 ? ['1001000'] : ['1001100']
   // if verify returns 1 then it's a immediate instruction set, 0 for register,
   // -1 for wrong instruction.
   },
-  cmp:{
+  cmp: {
     verify: (instruction) => {
-    return verification.verifyCmp(instruction)
+      return verification.verifyCmp(instruction)
     },
-  binaryeq: ['1111000']
+    binaryeq: ['1111000']
   }
 }
 
