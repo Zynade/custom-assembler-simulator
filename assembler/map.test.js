@@ -35,3 +35,15 @@ test('Verifying if OPcode obj handles error efd R1 R2 R3', () => {
 test('Verifying immteger value', () => {
   expect(map.immtest('$45')).toBe('00101101')
 })
+
+test('Verifying immteger value', () => {
+  expect(map.immtest('$0')).toBe('00000000')
+})
+
+test('Verifying immteger value', () => {
+  expect(map.immtest('$255')).toBe('11111111')
+})
+
+test('Verifying immteger value for incorrect value', () => {
+  expect(map.immtest('$256')).toBe(-1)
+})

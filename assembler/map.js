@@ -25,7 +25,6 @@ const opcode = {
     verify: (instruction) => verification.verifyTypeA(instruction),
     binaryeq: ['1011000']
   },
-<<<<<<< HEAD
   rs: {
     verify: (instruction) => {
       return verification.verifyTypeB(instruction)
@@ -39,8 +38,6 @@ const opcode = {
     binaryeq: ['11001']
   },
 
-=======
->>>>>>> 4fb6b449a2c040ad62dd66b42b2af5749fcba89a
   xor: {
     verify: (instruction) => verification.verifyTypeA(instruction),
     binaryeq: ['1101000']
@@ -53,7 +50,6 @@ const opcode = {
     verify: (instruction) => verification.verifyTypeA(instruction),
     binaryeq: ['1110000']
   },
-<<<<<<< HEAD
   mov: {
     verify: (instruction) => {
       return verification.verifyMov(instruction)
@@ -67,70 +63,6 @@ const opcode = {
       return verification.verifyCmp(instruction)
     },
     binaryeq: ['1111000']
-=======
-
-  // Type B instructions:
-  mov: {
-    // If verify returns 1 then it's a immediate instruction set, 0 for register, 1 for wrong instruction.
-    verify: (instruction) => verification.verifyMov(instruction),
-    binaryeq: (verify) => verify === 1 ? ['10010'] : ['1001100000']
-  },
-  rs: {
-    verify: (instruction) => verification.verifyTypeB(instruction),
-    binaryeq: ['11000']
-  },
-  ls: {
-    verify: (instruction) => verification.verifyTypeB(instruction),
-    binaryeq: ['11001']
-  },
-
-  // Type C instructions:
-  div: {
-    verify: (instruction) => verification.verifyTypeC(instruction),
-    binaryeq: ['1011100000']
-  },
-  not: {
-    verify: (instruction) => verification.verifyTypeC(instruction),
-    binaryeq: ['1110100000']
-  },
-  cmp: {
-    verify: (instruction) => verification.verifyTypeC(instruction),
-    binaryeq: ['1111000000']
-  },
-
-  // Type D instructions:
-  ld: {
-    verify: (instruction) => verification.verifyTypeD(instruction),
-    binaryeq: ['10100']
-  },
-  st: {
-    verify: (instruction) => verification.verifyTypeD(instruction),
-    binaryeq: ['10101']
-  },
-
-  // Type E instructions:
-  jmp: {
-    verify: (instruction) => verification.verifyTypeE(instruction),
-    binaryeq: ['11111000']
-  },
-  jlt: {
-    verify: (instruction) => verification.verifyTypeE(instruction),
-    binaryeq: ['01100000']
-  },
-  jgt: {
-    verify: (instruction) => verification.verifyTypeE(instruction),
-    binaryeq: ['01101000']
-  },
-  je: {
-    verify: (instruction) => verification.verifyTypeE(instruction),
-    binaryeq: ['01111000']
-  },
-
-  // Type F instructions
-  hlt: {
-    verify: (instruction) => verification.verifyTypeF(instruction),
-    binaryeq: ['0101000000000000']
->>>>>>> 4fb6b449a2c040ad62dd66b42b2af5749fcba89a
   }
 }
 

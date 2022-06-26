@@ -1,9 +1,5 @@
-<<<<<<< HEAD
 const map = require('./map')
 
-=======
-// Does not work at the moment.
->>>>>>> 4fb6b449a2c040ad62dd66b42b2af5749fcba89a
 function main (instruction) {
   instruction = instruction.split(' ')
   let binary = ''
@@ -23,6 +19,17 @@ function main (instruction) {
       // TODO raise error
     }
   }
-  // TODO Verify the last operand
+  if (!map.registers[instruction[instruction.length - 1]]) {
+    binary += map.registers[instruction[instruction.length - 1]]
+  } else if (instruction[instruction.length - 1][0] === '$') {
+    const immb = map.immtest(instruction[instruction.length - 1])
+    if (immb !== -1) {
+      binary += immb
+    } else {
+      // TODO raise error
+    }
+  } else {
+    // Todo labels and variables
+  }
   return binary
 }
