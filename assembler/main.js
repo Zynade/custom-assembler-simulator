@@ -1,3 +1,4 @@
+// Does not work at the moment.
 function main (instruction) {
   instruction = instruction.split(' ')
   let binary = ''
