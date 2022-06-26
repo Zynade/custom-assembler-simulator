@@ -13,13 +13,16 @@ function main (instruction) {
     // TODO: raise exception
   }
   for (let i = 1; i < instruction.length - 1; i++) {
-    if (!map.registers[instruction[i]]) {
+    if (map.registers[instruction[i]] !== undefined) {
       binary += map.registers[instruction[i]]
     } else {
       // TODO raise error
     }
   }
-  if (!map.registers[instruction[instruction.length - 1]]) {
+  if (instruction.length === 1) {
+    return binary
+  }
+  if (map.registers[instruction[instruction.length - 1]] !== undefined) {
     binary += map.registers[instruction[instruction.length - 1]]
   } else if (instruction[instruction.length - 1][0] === '$') {
     const immb = map.immtest(instruction[instruction.length - 1])
@@ -33,3 +36,5 @@ function main (instruction) {
   }
   return binary
 }
+
+module.exports = { main }

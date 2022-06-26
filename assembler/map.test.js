@@ -16,6 +16,10 @@ test('Verifying if OPcode obj gives correct opcode in case of : add R1 R2 R3', (
   expect(map.optest('add R1 R2 R3')).toBe('1000000')
 })
 
+test('Verifying if OPcode obj gives correct opcode in case of : mov R1 $10', () => {
+  expect(map.optest('mov R1 $10')).toBe('10010')
+})
+
 test('Verifying if OPcode obj gives correct opcode in case of : mul R1 R2 R4', () => {
   expect(map.optest('mul R1 R2 R3')).toBe('1011000')
 })
@@ -46,4 +50,8 @@ test('Verifying immteger value', () => {
 
 test('Verifying immteger value for incorrect value', () => {
   expect(map.immtest('$256')).toBe(-1)
+})
+
+test('Verifying immteger value', () => {
+  expect(map.immtest('$10')).toBe('00001010')
 })

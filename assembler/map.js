@@ -41,8 +41,8 @@ const opcode = {
   // Type B instructions:
   mov: {
     // If verify returns 1 then it's a immediate instruction set, 0 for register, 1 for wrong instruction.
-    verify: (instruction) => verification.verifyMov(instruction),
-    binaryeq: (verify) => verify === 1 ? ['10010'] : ['1001100000']
+    verify: (instruction) => verification.verifyMove(instruction),
+    binaryeq: ['1001100000', '10010']
   },
   rs: {
     verify: (instruction) => verification.verifyTypeB(instruction),
@@ -145,6 +145,6 @@ function ch (word, charToAdd, length) {
   return word
 }
 
-optest('add R1 R2 R3')
+// optest('add R1 R2 R3')
 
 module.exports = { registers, opcode, variables, dicttemp, optest, forbiddenKeywords, immtest }
