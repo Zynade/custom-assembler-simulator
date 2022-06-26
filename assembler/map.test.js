@@ -31,3 +31,7 @@ test('Verifying if OPcode obj gives correct opcode in case of : add R1 R2 $45', 
 test('Verifying if OPcode obj handles error efd R1 R2 R3', () => {
   expect(map.optest('efd R1 R2 R3')).toBe(-1)
 })
+
+test('Verifying immteger value', () => {
+  expect(map.immtest('$45')).toBe('00101101')
+})

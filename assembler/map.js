@@ -35,13 +35,13 @@ const opcode = {
     verify: (instruction) => {
       return verification.verifyTypeB(instruction)
     },
-    binaryeq: ['1100000']
+    binaryeq: ['11000']
   },
   ls: {
     verify: (instruction) => {
       return verification.verifyTypeB(instruction)
     },
-    binaryeq: ['1100100']
+    binaryeq: ['11001']
   },
 
   xor: {
@@ -62,19 +62,19 @@ const opcode = {
     },
     binaryeq: ['1110000']
   },
-  mov:{
+  mov: {
     verify: (instruction) => {
       return verification.verifyMov(instruction)
     },
-    binaryeq: (verify) => verify === 1 ? ['1001000'] : ['1001100']  
+    binaryeq: (verify) => verify === 1 ? ['1001000'] : ['1001100']
   // if verify returns 1 then it's a immediate instruction set, 0 for register,
   // -1 for wrong instruction.
   },
-  cmp:{
+  cmp: {
     verify: (instruction) => {
-    return verification.verifyCmp(instruction)
+      return verification.verifyCmp(instruction)
     },
-  binaryeq: ['1111000']
+    binaryeq: ['1111000']
   }
 }
 
@@ -105,6 +105,22 @@ function optest (instruction) {
   return -1
 }
 
+function immtest (intermediate) {
+  intermediate = intermediate.slice(1) // remove the $
+  if (Number(intermediate) > 255 || Number(intermediate) < 0) {
+    return -1
+  }
+  return ch(Number(intermediate).toString(2), '0', 8)
+}
+
+function ch (word, charToAdd, length) {
+  const initial = word.length
+  for (let i = 0; i < length - initial; i++) {
+    word = charToAdd + word
+  }
+  return word
+}
+
 optest('add R1 R2 R3')
 
-module.exports = { registers, opcode, variables, dicttemp, optest, forbiddenKeywords }
+module.exports = { registers, opcode, variables, dicttemp, optest, forbiddenKeywords, immtest }

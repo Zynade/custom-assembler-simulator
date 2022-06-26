@@ -1,18 +1,20 @@
+const map = require('./map')
+
 function main (instruction) {
   instruction = instruction.split(' ')
   let binary = ''
-  if (!opcode[instruction[0]]) {
+  if (!map.opcode[instruction[0]]) {
     // TODO: raise exception
   }
-  const ahhh = opcode[instruction[0]].verify(instruction)
-  if (aahh > -1) {
-    binary += opcode[instruction[0]].binaryeq[ahhh]
+  const ISA = map.opcode[instruction[0]].verify(instruction)
+  if (ISA > -1) {
+    binary += map.opcode[instruction[0]].binaryeq[ISA]
   } else {
     // TODO: raise exception
   }
   for (let i = 1; i < instruction.length - 1; i++) {
-    if (!registers[instruction[i]]) {
-      binary += registers[instruction[i]]
+    if (!map.registers[instruction[i]]) {
+      binary += map.registers[instruction[i]]
     } else {
       // TODO raise error
     }

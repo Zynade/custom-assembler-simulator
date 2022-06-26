@@ -3,7 +3,7 @@ const verify = require('./verify')
 test('Verfying valid TypeA reg using: mul reg0 reg1 reg2', () => {
   expect(
     verify.verifyTypeA(['mul', 'R0', 'R1', 'R2'])
-    ).toBe(0)
+  ).toBe(0)
 })
 
 test('Verfying invalid TypeA reg using: mul reg0 reg1', () => {
