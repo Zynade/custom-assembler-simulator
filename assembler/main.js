@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 const map = require('./map')
 
+=======
+// Does not work at the moment.
+>>>>>>> 4fb6b449a2c040ad62dd66b42b2af5749fcba89a
 function main (instruction) {
   instruction = instruction.split(' ')
   let binary = ''
