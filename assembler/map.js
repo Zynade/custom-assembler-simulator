@@ -119,7 +119,7 @@ function dicttemp (regist) {
 function optest (instruction) {
   instruction = instruction.split(' ')
   const tmp = opcode[instruction[0]]
-  if (!tmp) {
+  if (tmp === undefined) {
     return -1
   }
   //   console.log(tmp.verify(instruction))
@@ -129,17 +129,18 @@ function optest (instruction) {
   return -1
 }
 
-function immtest (intermediate) {
+function immDecToBin (intermediate) {
+  // This function converts the immediate number from decimal to its 8 bit binary number. If not possible, return -1.
   intermediate = intermediate.slice(1) // remove the $
-  if (Number(intermediate) > 255 || Number(intermediate) < 0) {
+  if (Number(intermediate) > 255 || Number(intermediate) < 0 || isNaN(Number(intermediate))) {
     return -1
   }
-  return ch(Number(intermediate).toString(2), '0', 8)
+  return extendToNBits(Number(intermediate).toString(2), '0', 8)
 }
 
-function ch (word, charToAdd, length) {
-  const initial = word.length
-  for (let i = 0; i < length - initial; i++) {
+function extendToNBits (word, charToAdd, n) {
+  const initialLength = word.length
+  for (let i = 0; i < n - initialLength; i++) {
     word = charToAdd + word
   }
   return word
@@ -147,4 +148,4 @@ function ch (word, charToAdd, length) {
 
 // optest('add R1 R2 R3')
 
-module.exports = { registers, opcode, variables, dicttemp, optest, forbiddenKeywords, immtest }
+module.exports = { registers, opcode, variables, dicttemp, optest, forbiddenKeywords, immDecToBin }
