@@ -25,7 +25,7 @@ function main (instruction) {
   if (map.registers[instruction[instruction.length - 1]] !== undefined) {
     binary += map.registers[instruction[instruction.length - 1]]
   } else if (instruction[instruction.length - 1][0] === '$') {
-    const immb = map.immtest(instruction[instruction.length - 1])
+    const immb = map.immDecToBin(instruction[instruction.length - 1])
     if (immb !== -1) {
       binary += immb
     } else {
