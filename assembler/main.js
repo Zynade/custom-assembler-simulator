@@ -1,8 +1,11 @@
 const map = require('./map')
 
-function main (instruction) {
+function processInstruction (instruction) {
   instruction = instruction.split(' ')
   let binary = ''
+  if (instruction[0]==='hlt'){
+    return -1                  //check
+  }
   if (!map.opcode[instruction[0]]) {
     // TODO: raise exception
   }
@@ -37,4 +40,20 @@ function main (instruction) {
   return binary
 }
 
-module.exports = { main }
+function main(){
+  let numInstructions
+  let instructions = []//this will be the array where we will store all the instructions
+  let result
+
+  for (let i = 0; i < numInstructions; i++){
+    result = processInstruction(instructions[i])
+    if (result === -1){ //condition checking for hlt case
+      result = "0101000000000000" //opcode for hlt instruction
+      break
+    }
+  }
+
+  //
+}
+
+module.exports = { processInstruction }
