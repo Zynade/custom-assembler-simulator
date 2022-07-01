@@ -19,8 +19,11 @@ function verifyTypeC (instruction) {
 }
 function verifyMove (instruction) {
   if (instruction.length === 3) {
-    if (instruction[2][0] === '$') return 1
-    else return 0
+    if (instruction[2][0] === '$') {
+      return 1
+    } else {
+      return 0
+    }
   }
   return -1
 }

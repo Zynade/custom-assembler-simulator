@@ -1,10 +1,13 @@
 const map = require('./map')
+const fs = require('fs')
+const FileI = fs.readFileSync('./assembler/input.txt', 'utf8')
 
 function processInstruction (instruction) {
   instruction = instruction.split(' ')
   let binary = ''
-  if (instruction[0]==='hlt'){
-    return -1                  //check
+  // console.log(instruction)
+  if (instruction[0] === 'hlt') {
+    return -1 // check
   }
   if (!map.opcode[instruction[0]]) {
     throw Error('Encountered a OP code not supported by the ISA');
@@ -15,6 +18,7 @@ function processInstruction (instruction) {
   } else {
     throw Error("Invalid instruction set encountered")
   }
+  // console.log(binary)
   for (let i = 1; i < instruction.length - 1; i++) {
     if (map.registers[instruction[i]] !== undefined) {
       binary += map.registers[instruction[i]]
@@ -22,9 +26,10 @@ function processInstruction (instruction) {
       throw Error("Invalid register encountered")
     }
   }
-  if (instruction.length === 1) {
-    return binary
-  }
+  // const a = instruction[instruction.length - 1]
+  // console.log(a)
+  // console.log(typeof (a))
+  // console.log(map.registers[a])
   if (map.registers[instruction[instruction.length - 1]] !== undefined) {
     binary += map.registers[instruction[instruction.length - 1]]
   } else if (instruction[instruction.length - 1][0] === '$') {
@@ -37,23 +42,29 @@ function processInstruction (instruction) {
   } else {
     throw Error("Encountered invalid instruction")
   }
+  // console.log(binary)
   return binary
 }
 
-function main(){
-  let numInstructions
-  let instructions = []//this will be the array where we will store all the instructions
+function main () {
+  // let numInstructions
+  const instructions = FileI.split('\n')
   let result
-
-  for (let i = 0; i < numInstructions; i++){
-    result = processInstruction(instructions[i])
-    if (result === -1){ //condition checking for hlt case
-      result = "0101000000000000" //opcode for hlt instruction
+  let output = ''
+  for (let i = 0; i < instructions.length; i++) {
+    // console.log(instructions[i])
+    result = processInstruction(instructions[i].trim())
+    // result += '\n'
+    if (result === -1) { // condition checking for hlt case
+      result = '0101000000000000' // opcode for hlt instruction
+      output += result + '\n'
       break
     }
+    output += result + '\n'
   }
-
+  fs.writeFileSync('./assembler/output.txt', output)
   //
 }
-
+// console.log(processInstruction(''))
+main()
 module.exports = { processInstruction }
