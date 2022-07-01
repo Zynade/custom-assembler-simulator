@@ -42,6 +42,9 @@ function verifyTypeE (instruction) {
   if (instruction.length === 2) {
     // Type E instructions are like: jmp mem_addr. Here, mem_addr must be a label. It cannot be a variable or an immediate value.
     const memAddr = instruction[1]
+    // if ((!map.forbiddenKeywords.includes(memAddr) && memAddr[0] !== '$') || main.labels.includes(memAddr)) {
+    // return 0
+    // }
     // NOTE: Add a check to ensure memAddr is a label.
     if (memAddr[0] !== '$') return 0
   }
