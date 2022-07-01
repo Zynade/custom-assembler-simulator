@@ -10,20 +10,20 @@ function processInstruction (instruction) {
     return -1 // check
   }
   if (!map.opcode[instruction[0]]) {
-    // TODO: raise exception
+    throw Error('Encountered a OP code not supported by the ISA');
   }
   const ISA = map.opcode[instruction[0]].verify(instruction)
   if (ISA > -1) {
     binary += map.opcode[instruction[0]].binaryeq[ISA]
   } else {
-    // TODO: raise exception
+    throw Error("Invalid instruction set encountered")
   }
   // console.log(binary)
   for (let i = 1; i < instruction.length - 1; i++) {
     if (map.registers[instruction[i]] !== undefined) {
       binary += map.registers[instruction[i]]
     } else {
-      // TODO raise error
+      throw Error("Invalid register encountered")
     }
   }
   // const a = instruction[instruction.length - 1]
@@ -33,14 +33,14 @@ function processInstruction (instruction) {
   if (map.registers[instruction[instruction.length - 1]] !== undefined) {
     binary += map.registers[instruction[instruction.length - 1]]
   } else if (instruction[instruction.length - 1][0] === '$') {
-    const immb = map.immDecToBin(instruction[instruction.length - 1])
-    if (immb !== -1) {
-      binary += immb
-    } else {
-      // TODO raise error
-    }
+      const immb = map.immDecToBin(instruction[instruction.length - 1])
+      if (immb !== -1) {
+        binary += immb
+      } else {
+        throw Error("Encountered immediate value is not allowed")
+      }
   } else {
-    // Todo labels and variables
+    throw Error("Encountered invalid instruction")
   }
   // console.log(binary)
   return binary
