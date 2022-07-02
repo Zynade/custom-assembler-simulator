@@ -3,7 +3,6 @@ const fs = require('fs')
 const FileI = fs.readFileSync('./assembler/input.txt', 'utf8')
 
 const labels = {}
-// const variables = {}
 let varArr = []
 const memSpace = {} //here if variables and labels are there in code then they will be stored 
                     //with key object being var name or label name and value will be memory addr
@@ -97,13 +96,13 @@ function preProcessInstructions (instructions) {
           throw Error('Invalid variable name: variable name cannot contain a space.')
         } else if (map.forbiddenKeywords.includes(variable)) {
           throw Error(`Invalid variable name: "${variable}" is a reserved keyword.`)
-        } else if (variables.hasOwnProperty(variable) ) {//
+        } else if (checkVar(varArr,variable) ) {//
           throw Error(`Invalid variable name: "${variable}" is already declared.`)
         }
-        const variables ={
-          variable: lineNumber
-        } 
+        const variables ={}
+        variables[variable] = lineNumber 
         varArr.push(variables)
+
         // variables[variable] = lineNumber
       }
     } else {
@@ -127,6 +126,13 @@ function preProcessInstructions (instructions) {
     }
   }
 }
+function checkVar (array, varName) {
+  for (let obj of array) {
+    if (obj.hasOwnProperty(varName)) {
+      return true
+    }
+  }
+} 
 
 function main () {
   // let numInstructions
@@ -136,24 +142,24 @@ function main () {
   let memory = 0
   let lineNumber
   let lineNumberOfVar
-  let varName
   
-  console.log(varArr)
-  console.log(labels)
   preProcessInstructions(instructions)
-
-  let numOfVariables = Object.keys(variables).length
+  // console.log(labels)
+  // console.log(varArr)
+  let numOfVariables = varArr.length
   memory = instructions.length - numOfVariables
   for (let key in labels) {
     lineNumber = Number(labels[key]-numOfVariables).toString(2)
     memSpace[key] = map.extendToNBits(lineNumber, 0, 16)
   }
   for (let eachVar of varArr) {
-    varName = eachVar.keys
-    lineNumberOfVar = eachVar.keys
-    lineNumber = Number(memory+lineNumberOfVar[1]).toString(2)
-    memSpace[varName[0]] = map.extendToNBits(lineNumber, 0, 16)
+    lineNumberOfVar = Object.keys(eachVar)
+    // console.log(lineNumberOfVar)
+    lineNumber = Number(memory+eachVar[lineNumberOfVar[0]]).toString(2)
+    // console.log(varArrlineNumberOfVar)
+    memSpace[lineNumberOfVar] = map.extendToNBits(lineNumber, 0, 16)
   }
+  console.log(memSpace)
   // main loop
   for (let i = 0; i < instructions.length; i++) {
     console.log(instructions[i])
@@ -167,7 +173,6 @@ function main () {
     output += result + '\n'
   }
   fs.writeFileSync('./assembler/output.txt', output)
-  console.log(memSpace)
 }
 // console.log(processInstruction(''))
 main()
