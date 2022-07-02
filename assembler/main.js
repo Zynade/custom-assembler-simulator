@@ -54,9 +54,9 @@ function processInstruction (instructionStr) {
   if (map.registers[instruction[instruction.length - 1]] !== undefined) {
     binary += map.registers[instruction[instruction.length - 1]]
   } else if(checkVar(varArr,instruction[i])[0]) {
-      let addres = (Number(checkVar(varArr,instruction[i])[1]).toString(2))
-      binary += addNBits(addres,3)
-    } else if (instruction[instruction.length - 1][0] === '$') {
+    // let addres = (Number(checkVar(varArr,instruction[i])[1]).toString(2))
+    binary += memSpace[instruction[instruction.length - 1]]
+  } else if (instruction[instruction.length - 1][0] === '$') {
     const immb = map.immDecToBin(instruction[instruction.length - 1])
     if (immb !== -1) {
       binary += immb
