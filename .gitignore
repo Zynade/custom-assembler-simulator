@@ -1,2 +1,4 @@
 node_modules/
 .vscode/
+assembler/input.txt
+assembler/output.txt
