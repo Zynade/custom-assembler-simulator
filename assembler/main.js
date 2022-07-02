@@ -48,7 +48,7 @@ function processInstruction (instructionStr) {
     if (map.registers[instruction[i]] !== undefined) {
       binary += map.registers[instruction[i]]
     } else if(memSpace[instruction[i]] !== undefined) {
-      binary += variables[instruction[i]]//memSpace[instruction[i]]
+      binary += memSpace[instruction[i]]//memSpace[instruction[i]]
     } else {
       throw Error('Invalid register encountered')
     }
@@ -144,8 +144,6 @@ function main () {
   let lineNumberOfVar
   
   preProcessInstructions(instructions)
-  // console.log(labels)
-  // console.log(varArr)
   let numOfVariables = varArr.length
   memory = instructions.length - numOfVariables
   for (let key in labels) {
@@ -154,17 +152,12 @@ function main () {
   }
   for (let eachVar of varArr) {
     lineNumberOfVar = Object.keys(eachVar)
-    // console.log(lineNumberOfVar)
     lineNumber = Number(memory+eachVar[lineNumberOfVar[0]]).toString(2)
-    // console.log(varArrlineNumberOfVar)
     memSpace[lineNumberOfVar] = map.extendToNBits(lineNumber, 0, 16)
   }
-  console.log(memSpace)
-  // main loop
+  // console.log(memSpace)
   for (let i = 0; i < instructions.length; i++) {
-    console.log(instructions[i])
     result = processInstruction(instructions[i].trim())
-    // result += '\n'
     if (result === -1) { // condition checking for hlt case
       result = '0101000000000000' // opcode for hlt instruction
       output += result + '\n'
