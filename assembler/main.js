@@ -3,7 +3,10 @@ const fs = require('fs')
 const FileI = fs.readFileSync('./assembler/input.txt', 'utf8')
 
 const labels = {}
-const variables = {}
+// const variables = {}
+let varArr = []
+const memSpace = {} //here if variables and labels are there in code then they will be stored 
+                    //with key object being var name or label name and value will be memory addr
 
 function processInstruction (instructionStr) {
   let binary = ''
@@ -14,6 +17,9 @@ function processInstruction (instructionStr) {
   // The below code processes the instruction.
   // Process label declaration
   for (let i = 0; i < operation.length; i++) {
+    if (instruction[0]==='var') {
+      return ''
+    }
     if (operation[i] === ':') {
       // if the line contains only the label name, just go to the next line without appending any binary.
       if (instruction.length === 1) {
@@ -42,6 +48,8 @@ function processInstruction (instructionStr) {
   for (let i = 1; i < instruction.length - 1; i++) {
     if (map.registers[instruction[i]] !== undefined) {
       binary += map.registers[instruction[i]]
+    } else if(memSpace[instruction[i]] !== undefined) {
+      binary += variables[instruction[i]]//memSpace[instruction[i]]
     } else {
       throw Error('Invalid register encountered')
     }
@@ -71,7 +79,7 @@ function removeWhitespace (string) {
   return string.replace(/\s+/g, ' ').trim().split(' ')
 }
 
-function preprocessInstructions (instructions) {
+function preProcessInstructions (instructions) {
   // This function loops throught the code and stores all variables and labels in their respective objects.
   let areVarsDeclared = false
   for (let lineNumber = 0; lineNumber < instructions.length; lineNumber++) {
@@ -89,10 +97,14 @@ function preprocessInstructions (instructions) {
           throw Error('Invalid variable name: variable name cannot contain a space.')
         } else if (map.forbiddenKeywords.includes(variable)) {
           throw Error(`Invalid variable name: "${variable}" is a reserved keyword.`)
-        } else if (map.variables.includes(variable)) {
+        } else if (variables.hasOwnProperty(variable) ) {//
           throw Error(`Invalid variable name: "${variable}" is already declared.`)
         }
-        variables[variable] = null
+        const variables ={
+          variable: lineNumber
+        } 
+        varArr.push(variables)
+        // variables[variable] = lineNumber
       }
     } else {
       areVarsDeclared = true
@@ -104,7 +116,7 @@ function preprocessInstructions (instructions) {
         const label = operation.slice(0, i++)
         if (map.forbiddenKeywords.includes(label)) {
           throw Error(`Invalid label: "${label}" is a reserved keyword.`)
-        } else if (labels.includes(label)) {
+        } else if (labels.hasOwnProperty(label) ) {
           throw Error(`Invalid label: "${label}" is already declared.`)
         }
         instruction = removeWhitespace(instructionStr.slice(i))
@@ -121,12 +133,30 @@ function main () {
   const instructions = FileI.split('\n')
   let result
   let output = ''
+  let memory = 0
+  let lineNumber
+  let lineNumberOfVar
+  let varName
+  
+  console.log(varArr)
+  console.log(labels)
+  preProcessInstructions(instructions)
 
-  preprocessInstructions(instructions)
-
+  let numOfVariables = Object.keys(variables).length
+  memory = instructions.length - numOfVariables
+  for (let key in labels) {
+    lineNumber = Number(labels[key]-numOfVariables).toString(2)
+    memSpace[key] = map.extendToNBits(lineNumber, 0, 16)
+  }
+  for (let eachVar of varArr) {
+    varName = eachVar.keys
+    lineNumberOfVar = eachVar.keys
+    lineNumber = Number(memory+lineNumberOfVar[1]).toString(2)
+    memSpace[varName[0]] = map.extendToNBits(lineNumber, 0, 16)
+  }
   // main loop
   for (let i = 0; i < instructions.length; i++) {
-    // console.log(instructions[i])
+    console.log(instructions[i])
     result = processInstruction(instructions[i].trim())
     // result += '\n'
     if (result === -1) { // condition checking for hlt case
@@ -137,7 +167,7 @@ function main () {
     output += result + '\n'
   }
   fs.writeFileSync('./assembler/output.txt', output)
-  //
+  console.log(memSpace)
 }
 // console.log(processInstruction(''))
 main()

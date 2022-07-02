@@ -1,3 +1,7 @@
+var naman
 mov R1 $100
+start: add R1 R2 R3
 add R1 R2 R3
-add R2 R4
+add R2 R4 R5
+add R1 naman R3
+hlt
