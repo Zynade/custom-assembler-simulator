@@ -53,8 +53,10 @@ function processInstruction (instructionStr) {
   }
   if (map.registers[instruction[instruction.length - 1]] !== undefined) {
     binary += map.registers[instruction[instruction.length - 1]]
-  } else if(checkVar(varArr,instruction[i])[0]) {
+  } else if(checkVar(varArr,instruction[instruction.length-1])[0]) {
     // let addres = (Number(checkVar(varArr,instruction[i])[1]).toString(2))
+    binary += memSpace[instruction[instruction.length - 1]]
+  } else if (memSpace.hasOwnProperty(instruction[instruction.length - 1])) {
     binary += memSpace[instruction[instruction.length - 1]]
   } else if (instruction[instruction.length - 1][0] === '$') {
     const immb = map.immDecToBin(instruction[instruction.length - 1])
@@ -84,12 +86,18 @@ function addNBits(binary, n) {
 function preProcessInstructions (instructions) {
   // This function loops throught the code and stores all variables and labels in their respective objects.
   let areVarsDeclared = false
+  let hlt = 0
   for (let lineNumber = 0; lineNumber < instructions.length; lineNumber++) {
     const instructionStr = instructions[lineNumber]
     let instruction = removeWhitespace(instructionStr)
     let operation = instruction[0]
 
     // Process variable declarations
+    if (operation === 'hlt') {
+      hlt++
+      return
+    }
+
     if (operation === 'var') {
       if (areVarsDeclared) {
         throw Error('Variable must be declared before any other instructions.')
@@ -128,6 +136,9 @@ function preProcessInstructions (instructions) {
       }
     }
   }
+  if (hlt === 0) {
+    throw Error('No HLT instruction found.')
+  }
 }
 function checkVar (array, varName) {
   for (i = 0; i<array.length; i++) {
@@ -151,14 +162,15 @@ function main () {
   memory = instructions.length - numOfVariables
   for (let key in labels) {
     lineNumber = Number(labels[key]-numOfVariables).toString(2)
-    memSpace[key] = map.extendToNBits(lineNumber, 0, 16)
+    memSpace[key] = map.extendToNBits(lineNumber, 0, 8)
   }
   for (let eachVar of varArr) {
     lineNumberOfVar = Object.keys(eachVar)
     lineNumber = Number(memory+eachVar[lineNumberOfVar[0]]).toString(2)
-    memSpace[lineNumberOfVar] = map.extendToNBits(lineNumber, 0, 16)
+    memSpace[lineNumberOfVar] = map.extendToNBits(lineNumber, 0, 8)
   }
   for (let i = 0; i < instructions.length; i++) {
+    console.log(instructions[i])
     result = processInstruction(instructions[i].trim())
     if (result === -1) { // condition checking for hlt case
       result = '0101000000000000' // opcode for hlt instruction
@@ -166,6 +178,9 @@ function main () {
       break
     }
     output += result + '\n'
+    if (result === '') {
+      output = ''
+    }
   }
   fs.writeFileSync('./assembler/output.txt', output)
 }
