@@ -47,16 +47,13 @@ function processInstruction (instructionStr) {
   for (let i = 1; i < instruction.length - 1; i++) {
     if (map.registers[instruction[i]] !== undefined) {
       binary += map.registers[instruction[i]]
-    } else if(memSpace[instruction[i]] !== undefined) {
-      binary += memSpace[instruction[i]]//memSpace[instruction[i]]
+    } else if(checkVar(varArr,instruction[i])[0]) {
+      let addres = (Number(checkVar(varArr,instruction[i])[1]).toString(2))
+      binary += addNBits(addres,3)
     } else {
       throw Error('Invalid register encountered')
     }
   }
-  // const a = instruction[instruction.length - 1]
-  // console.log(a)
-  // console.log(typeof (a))
-  // console.log(map.registers[a])
   if (map.registers[instruction[instruction.length - 1]] !== undefined) {
     binary += map.registers[instruction[instruction.length - 1]]
   } else if (instruction[instruction.length - 1][0] === '$') {
@@ -69,13 +66,19 @@ function processInstruction (instructionStr) {
   } else {
     throw Error('Encountered invalid instruction')
   }
-  // console.log(binary)
   return binary
 }
 
 function removeWhitespace (string) {
   // Takes a string and trims all whitespace, replaces any instance of double space with a single space.
   return string.replace(/\s+/g, ' ').trim().split(' ')
+}
+function addNBits(binary, n) {
+  // This function adds n bits to the end of the binary string.
+  while (binary.length < n) {
+    binary = '0' + binary
+  }
+  return binary
 }
 
 function preProcessInstructions (instructions) {
@@ -96,7 +99,7 @@ function preProcessInstructions (instructions) {
           throw Error('Invalid variable name: variable name cannot contain a space.')
         } else if (map.forbiddenKeywords.includes(variable)) {
           throw Error(`Invalid variable name: "${variable}" is a reserved keyword.`)
-        } else if (checkVar(varArr,variable) ) {//
+        } else if (checkVar(varArr,variable)[0] ) {//
           throw Error(`Invalid variable name: "${variable}" is already declared.`)
         }
         const variables ={}
@@ -127,15 +130,15 @@ function preProcessInstructions (instructions) {
   }
 }
 function checkVar (array, varName) {
-  for (let obj of array) {
-    if (obj.hasOwnProperty(varName)) {
-      return true
+  for (i = 0; i<array.length; i++) {
+    if (array[i].hasOwnProperty(varName)) {
+      return [true,i]
     }
   }
+  return [false,0]
 } 
 
 function main () {
-  // let numInstructions
   const instructions = FileI.split('\n')
   let result
   let output = ''
@@ -155,7 +158,6 @@ function main () {
     lineNumber = Number(memory+eachVar[lineNumberOfVar[0]]).toString(2)
     memSpace[lineNumberOfVar] = map.extendToNBits(lineNumber, 0, 16)
   }
-  // console.log(memSpace)
   for (let i = 0; i < instructions.length; i++) {
     result = processInstruction(instructions[i].trim())
     if (result === -1) { // condition checking for hlt case
@@ -167,6 +169,6 @@ function main () {
   }
   fs.writeFileSync('./assembler/output.txt', output)
 }
-// console.log(processInstruction(''))
+
 main()
 module.exports = { processInstruction }
