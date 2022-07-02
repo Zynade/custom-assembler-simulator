@@ -47,15 +47,15 @@ function processInstruction (instructionStr) {
   for (let i = 1; i < instruction.length - 1; i++) {
     if (map.registers[instruction[i]] !== undefined) {
       binary += map.registers[instruction[i]]
-    } else if(checkVar(varArr,instruction[i])[0]) {
-      let addres = (Number(checkVar(varArr,instruction[i])[1]).toString(2))
-      binary += addNBits(addres,3)
     } else {
       throw Error('Invalid register encountered')
     }
   }
   if (map.registers[instruction[instruction.length - 1]] !== undefined) {
     binary += map.registers[instruction[instruction.length - 1]]
+  } else if(checkVar(varArr,instruction[i])[0]) {
+    // let addres = (Number(checkVar(varArr,instruction[i])[1]).toString(2))
+    binary += memSpace[instruction[instruction.length - 1]]
   } else if (instruction[instruction.length - 1][0] === '$') {
     const immb = map.immDecToBin(instruction[instruction.length - 1])
     if (immb !== -1) {
