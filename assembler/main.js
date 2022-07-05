@@ -1,11 +1,17 @@
 const map = require('./map')
-const fs = require('fs')
-const FileI = fs.readFileSync('./assembler/input.txt', 'utf8')
-
+// const fs = require('fs')
+// const FileI = fs.readFileSync('./assembler/input.txt', 'utf8')
+const rl = require('readline').createInterface({
+  input: process.stdin,
+  output: process.stdout
+})
 const labels = {}
 const variables = {}
 
 function processInstruction (instructionStr) {
+  if (instructionStr === '') {
+    return -2
+  }
   let binary = ''
   let instruction = removeWhitespace(instructionStr)
   let operation = instruction[0]
@@ -30,6 +36,7 @@ function processInstruction (instructionStr) {
     return -1 // check
   }
   if (map.opcode[instruction[0]] === undefined) {
+    console.log('instruction: ', instruction[0])
     throw Error('Encountered a OP code not supported by the ISA')
   }
   const ISA = map.opcode[operation].verify(instruction)
@@ -116,12 +123,11 @@ function preprocessInstructions (instructions) {
   }
 }
 
-function main () {
+function main (instructions) {
+  instructions = instructions.split('\n')
   // let numInstructions
-  const instructions = FileI.split('\n')
   let result
   let output = ''
-
   preprocessInstructions(instructions)
 
   // main loop
@@ -129,6 +135,9 @@ function main () {
     // console.log(instructions[i])
     result = processInstruction(instructions[i].trim())
     // result += '\n'
+    if (result === -2) {
+      continue
+    }
     if (result === -1) { // condition checking for hlt case
       result = '0101000000000000' // opcode for hlt instruction
       output += result + '\n'
@@ -136,9 +145,15 @@ function main () {
     }
     output += result + '\n'
   }
-  fs.writeFileSync('./assembler/output.txt', output)
-  //
+  console.log(output)
 }
+let program = ''
 // console.log(processInstruction(''))
-main()
+rl.on('line', (input) => {
+  program += input + '\n'
+})
+rl.on('close', () => {
+  main(program)
+})
+// console.log(main(Program))
 module.exports = { processInstruction }
