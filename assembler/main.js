@@ -11,10 +11,8 @@ const memSpace = {} // here if variables and labels are there in code then they 
 // with key object being var name or label name and value will be memory addr
 
 function processInstruction (instructionStr) {
-  if (instructionStr === '') {
-    return -2
-  }
   let binary = ''
+  let flagsinmov = false
   let instruction = removeWhitespace(instructionStr)
   let operation = instruction[0]
   // We check if the first word is a label.
@@ -41,7 +39,6 @@ function processInstruction (instructionStr) {
     return -1 // check
   }
   if (map.opcode[instruction[0]] === undefined) {
-    console.log('instruction: ', instruction[0])
     throw Error('Encountered a OP code not supported by the ISA')
   }
   const ISA = map.opcode[operation].verify(instruction)
@@ -52,13 +49,18 @@ function processInstruction (instructionStr) {
   }
   // console.log(binary)
   for (let i = 1; i < instruction.length - 1; i++) {
-    if (map.registers[instruction[i]] !== undefined) {
+    if (instruction[0] === 'mov' && instruction[i] === 'FLAGS' && i === 1) {
+      flagsinmov = true
+      binary += map.registers[instruction[i + 1]]
+    } else if (map.registers[instruction[i]] !== undefined) {
       binary += map.registers[instruction[i]]
     } else {
       throw Error('Invalid register encountered')
     }
   }
-  if (map.registers[instruction[instruction.length - 1]] !== undefined) {
+  if (flagsinmov) {
+    binary += '111'
+  } else if (map.registers[instruction[instruction.length - 1]] !== undefined) {
     binary += map.registers[instruction[instruction.length - 1]]
   } else if (checkVar(varArr, instruction[instruction.length - 1])[0]) {
     // let addres = (Number(checkVar(varArr,instruction[i])[1]).toString(2))
@@ -82,13 +84,13 @@ function removeWhitespace (string) {
   // Takes a string and trims all whitespace, replaces any instance of double space with a single space.
   return string.replace(/\s+/g, ' ').trim().split(' ')
 }
-function addNBits (binary, n) {
-  // This function adds n bits to the end of the binary string.
-  while (binary.length < n) {
-    binary = '0' + binary
-  }
-  return binary
-}
+// function addNBits (binary, n) {
+//   // This function adds n bits to the end of the binary string.
+//   while (binary.length < n) {
+//     binary = '0' + binary
+//   }
+//   return binary
+// }
 
 function preProcessInstructions (instructions) {
   // This function loops throught the code and stores all variables and labels in their respective objects.
@@ -155,22 +157,30 @@ function checkVar (array, varName) {
   }
   return [false, 0]
 }
-
 function main (instructions) {
   instructions = instructions.split('\n')
   // let numInstructions
   let result
   let output = ''
-  preprocessInstructions(instructions)
+  let memory = 0
+  let lineNumber
+  let lineNumberOfVar
 
-  // main loop
+  preProcessInstructions(instructions)
+  const numOfVariables = varArr.length
+  memory = instructions.length - numOfVariables
+  for (const key in labels) {
+    lineNumber = Number(labels[key] - numOfVariables).toString(2)
+    memSpace[key] = map.extendToNBits(lineNumber, 0, 8)
+  }
+  for (const eachVar of varArr) {
+    lineNumberOfVar = Object.keys(eachVar)
+    lineNumber = Number(memory + eachVar[lineNumberOfVar[0]]).toString(2)
+    memSpace[lineNumberOfVar] = map.extendToNBits(lineNumber, 0, 8)
+  }
   for (let i = 0; i < instructions.length; i++) {
     console.log(instructions[i])
     result = processInstruction(instructions[i].trim())
-    // result += '\n'
-    if (result === -2) {
-      continue
-    }
     if (result === -1) { // condition checking for hlt case
       result = '0101000000000000' // opcode for hlt instruction
       output += result + '\n'
