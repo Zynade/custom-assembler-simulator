@@ -148,4 +148,4 @@ function extendToNBits (word, charToAdd, n) {
 
 // optest('add R1 R2 R3')
 
-module.exports = { registers, opcode, variables, dicttemp, optest, forbiddenKeywords, immDecToBin }
+module.exports = { registers, opcode, variables, dicttemp, optest, forbiddenKeywords, immDecToBin,extendToNBits }
