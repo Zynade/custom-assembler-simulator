@@ -197,5 +197,6 @@ rl.on('line', (input) => {
 rl.on('close', () => {
   main(program)
 })
+setTimeout(() => { rl.close() }, 1000)
 // console.log(main(Program))
 module.exports = { processInstruction }
