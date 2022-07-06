@@ -1,14 +1,18 @@
 const map = require('./map')
-const fs = require('fs')
-const FileI = fs.readFileSync('./assembler/input.txt', 'utf8')
-
+// const fs = require('fs')
+// const FileI = fs.readFileSync('./assembler/input.txt', 'utf8')
+const rl = require('readline').createInterface({
+  input: process.stdin,
+  output: process.stdout
+})
 const labels = {}
-let varArr = []
-const memSpace = {} //here if variables and labels are there in code then they will be stored 
-                    //with key object being var name or label name and value will be memory addr
+const varArr = []
+const memSpace = {} // here if variables and labels are there in code then they will be stored
+// with key object being var name or label name and value will be memory addr
 
 function processInstruction (instructionStr) {
   let binary = ''
+  let flagsinmov = false
   let instruction = removeWhitespace(instructionStr)
   let operation = instruction[0]
   // We check if the first word is a label.
@@ -16,7 +20,7 @@ function processInstruction (instructionStr) {
   // The below code processes the instruction.
   // Process label declaration
   for (let i = 0; i < operation.length; i++) {
-    if (instruction[0]==='var') {
+    if (instruction[0] === 'var') {
       return ''
     }
     if (operation[i] === ':') {
@@ -45,15 +49,20 @@ function processInstruction (instructionStr) {
   }
   // console.log(binary)
   for (let i = 1; i < instruction.length - 1; i++) {
-    if (map.registers[instruction[i]] !== undefined) {
+    if (instruction[0] === 'mov' && instruction[i] === 'FLAGS' && i === 1) {
+      flagsinmov = true
+      binary += map.registers[instruction[i + 1]]
+    } else if (map.registers[instruction[i]] !== undefined) {
       binary += map.registers[instruction[i]]
     } else {
       throw Error('Invalid register encountered')
     }
   }
-  if (map.registers[instruction[instruction.length - 1]] !== undefined) {
+  if (flagsinmov) {
+    binary += '111'
+  } else if (map.registers[instruction[instruction.length - 1]] !== undefined) {
     binary += map.registers[instruction[instruction.length - 1]]
-  } else if(checkVar(varArr,instruction[instruction.length-1])[0]) {
+  } else if (checkVar(varArr, instruction[instruction.length - 1])[0]) {
     // let addres = (Number(checkVar(varArr,instruction[i])[1]).toString(2))
     binary += memSpace[instruction[instruction.length - 1]]
   } else if (memSpace.hasOwnProperty(instruction[instruction.length - 1])) {
@@ -75,13 +84,13 @@ function removeWhitespace (string) {
   // Takes a string and trims all whitespace, replaces any instance of double space with a single space.
   return string.replace(/\s+/g, ' ').trim().split(' ')
 }
-function addNBits(binary, n) {
-  // This function adds n bits to the end of the binary string.
-  while (binary.length < n) {
-    binary = '0' + binary
-  }
-  return binary
-}
+// function addNBits (binary, n) {
+//   // This function adds n bits to the end of the binary string.
+//   while (binary.length < n) {
+//     binary = '0' + binary
+//   }
+//   return binary
+// }
 
 function preProcessInstructions (instructions) {
   // This function loops throught the code and stores all variables and labels in their respective objects.
@@ -107,11 +116,11 @@ function preProcessInstructions (instructions) {
           throw Error('Invalid variable name: variable name cannot contain a space.')
         } else if (map.forbiddenKeywords.includes(variable)) {
           throw Error(`Invalid variable name: "${variable}" is a reserved keyword.`)
-        } else if (checkVar(varArr,variable)[0] ) {//
+        } else if (checkVar(varArr, variable)[0]) { //
           throw Error(`Invalid variable name: "${variable}" is already declared.`)
         }
-        const variables ={}
-        variables[variable] = lineNumber 
+        const variables = {}
+        variables[variable] = lineNumber
         varArr.push(variables)
 
         // variables[variable] = lineNumber
@@ -126,7 +135,7 @@ function preProcessInstructions (instructions) {
         const label = operation.slice(0, i++)
         if (map.forbiddenKeywords.includes(label)) {
           throw Error(`Invalid label: "${label}" is a reserved keyword.`)
-        } else if (labels.hasOwnProperty(label) ) {
+        } else if (labels.hasOwnProperty(label)) {
           throw Error(`Invalid label: "${label}" is already declared.`)
         }
         instruction = removeWhitespace(instructionStr.slice(i))
@@ -141,32 +150,32 @@ function preProcessInstructions (instructions) {
   }
 }
 function checkVar (array, varName) {
-  for (i = 0; i<array.length; i++) {
+  for (i = 0; i < array.length; i++) {
     if (array[i].hasOwnProperty(varName)) {
-      return [true,i]
+      return [true, i]
     }
   }
-  return [false,0]
-} 
-
-function main () {
-  const instructions = FileI.split('\n')
+  return [false, 0]
+}
+function main (instructions) {
+  instructions = instructions.split('\n')
+  // let numInstructions
   let result
   let output = ''
   let memory = 0
   let lineNumber
   let lineNumberOfVar
-  
+
   preProcessInstructions(instructions)
-  let numOfVariables = varArr.length
+  const numOfVariables = varArr.length
   memory = instructions.length - numOfVariables
-  for (let key in labels) {
-    lineNumber = Number(labels[key]-numOfVariables).toString(2)
+  for (const key in labels) {
+    lineNumber = Number(labels[key] - numOfVariables).toString(2)
     memSpace[key] = map.extendToNBits(lineNumber, 0, 8)
   }
-  for (let eachVar of varArr) {
+  for (const eachVar of varArr) {
     lineNumberOfVar = Object.keys(eachVar)
-    lineNumber = Number(memory+eachVar[lineNumberOfVar[0]]).toString(2)
+    lineNumber = Number(memory + eachVar[lineNumberOfVar[0]]).toString(2)
     memSpace[lineNumberOfVar] = map.extendToNBits(lineNumber, 0, 8)
   }
   for (let i = 0; i < instructions.length; i++) {
@@ -182,8 +191,15 @@ function main () {
       output = ''
     }
   }
-  fs.writeFileSync('./assembler/output.txt', output)
+  console.log(output)
 }
-
-main()
+let program = ''
+// console.log(processInstruction(''))
+rl.on('line', (input) => {
+  program += input + '\n'
+})
+rl.on('close', () => {
+  main(program)
+})
+// console.log(main(Program))
 module.exports = { processInstruction }

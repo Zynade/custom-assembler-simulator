@@ -1,3 +1,8 @@
+var ceil
+loop: add R0 R1 R2
+mov FLAGS R1
 add R0 R1 R2
+cmp R1 R3
+cmp R2 R3
 add R0 R1 R2
-add R0 R1 R2
+hlt
