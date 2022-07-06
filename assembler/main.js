@@ -12,7 +12,6 @@ const memSpace = {} // here if variables and labels are there in code then they 
 
 function processInstruction (instructionStr) {
   let binary = ''
-  let flagsinmov = false
   let instruction = removeWhitespace(instructionStr)
   let operation = instruction[0]
   // We check if the first word is a label.
@@ -50,17 +49,14 @@ function processInstruction (instructionStr) {
   // console.log(binary)
   for (let i = 1; i < instruction.length - 1; i++) {
     if (instruction[0] === 'mov' && instruction[i] === 'FLAGS' && i === 1) {
-      flagsinmov = true
-      binary += map.registers[instruction[i + 1]]
+      binary += '111'
     } else if (map.registers[instruction[i]] !== undefined) {
       binary += map.registers[instruction[i]]
     } else {
       throw Error('Invalid register encountered')
     }
   }
-  if (flagsinmov) {
-    binary += '111'
-  } else if (map.registers[instruction[instruction.length - 1]] !== undefined) {
+  if (map.registers[instruction[instruction.length - 1]] !== undefined) {
     binary += map.registers[instruction[instruction.length - 1]]
   } else if (checkVar(varArr, instruction[instruction.length - 1])[0]) {
     // let addres = (Number(checkVar(varArr,instruction[i])[1]).toString(2))
