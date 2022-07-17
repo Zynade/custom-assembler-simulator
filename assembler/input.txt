@@ -1,8 +1,4 @@
-var ceil
-loop: add R0 R1 R2
-mov FLAGS R1
-add R0 R1 R2
-cmp R1 R3
-cmp R2 R3
-add R0 R1 R2
+mov R1 $32
+mov R3 $31
+add R3 R1 R0
 hlt

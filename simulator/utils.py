@@ -28,12 +28,12 @@ def typeE(inst) -> list:
     # Number of bits = Inst(5bits) + Unused(3) + MemAddr(8)
     return [inst[0:5],inst[7:16]]
 
-def typef(inst) -> list:
+def typeF(inst) -> list:
     '''returns a list of inst and regs in type f format \n
         Type f format = [instruction]'''
     # Number of bits = Inst(5bits) + Unused(11)
     return [inst[0:5]]
 
-def index(binarystr) -> int:
-    '''returns the index of the instruction in the dictionary'''
-    return int(binarystr,2)
+# def index(binarystr) -> int:
+#     '''returns the index of the instruction in the dictionary'''
+#     return int(binarystr,2)

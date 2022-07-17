@@ -1,13 +1,17 @@
 from utils import *
 from register import Register
+import sys
+# from sys import std
 
 #Initialied all the registers in global context
+
+
 PC = Register("PC",8)
 RF = [Register(f"r{i}",16) for i in range(8)]
 RF[7].name = "FLAGS"
 HLTFLAG = False
 
-MEM = ""
+# MEM = ""
 
 def setFlags(index, value) -> None:
     '''sets The flag for overflow(V), less than(L), greater than(G), equals(E). Also used to reset them \n
@@ -65,6 +69,7 @@ def movIntermediate(inst) -> None:
     '''Perfoms the mov inst : r3 = 45 if mov r3 $45'''
     components = typeB(inst)
     RF[int(components[1],2)].value = int(components[2], 2)
+    # print(f"Register {components[1]} is set to {RF[int(components[1],2)].value}")
 
 def rightShift(inst) -> None:
     '''Perfoms the rightshift inst : r3 = r1 >> 45 if rs r1 45'''
@@ -108,4 +113,78 @@ def compare(inst) -> None:
     else :
         setFlags(0,1)
 
+#Type D instructions
+
+def load(inst) -> None:
+    '''Perfoms the load inst : r3 = $45 if load r3 $45'''
+    pass
+
+def store(inst) -> None:
+    '''Perfoms the store inst : $45 = r3 if store r3 $45'''
+    pass
+
+#Type E instructions
+def jmp(inst) -> None:
+    '''Perfoms the jmp inst : PC = 45 if jmp $45'''
+    components = typeB(inst)
+    PC.value = int(components[1],2)
+
+def jlt(inst) -> None:
+    '''Perfoms the jlt inst : PC = 45 if jlt $45'''
+    pass
+    components = typeB(inst)
+    if getFlag(1) == 1 :
+        PC.value = int(components[1],2)
+
+def jgt(inst) -> None:
+    '''Perfoms the jgt inst : PC = 45 if jgt $45'''
+    pass
+    components = typeB(inst)
+    if getFlag(2) == 1 :
+        PC.value = int(components[1],2)
+    
+def je(inst) -> None:
+    '''Perfoms the jle inst : PC = 45 if jle $45'''
+    pass
+    components = typeB(inst)
+    if getFlag(1) == 1 or getFlag(0) == 1 :
+        PC.value = int(components[1],2)
+
+#type F instructions
+def halt(inst) -> None:
+    '''Perfoms the halt inst : halt'''
+    components = typeF(inst)
+    HLTFLAG = True
+
 ExecuteEngine = {"10000" : add , "10001" : sub , "10010" : movIntermediate , "10011" : movRegister , "10100" : load , "10101" : store , "10110" : multiply , "10111" : divide , "11000" : rightShift , "11001" : leftShift , "11010" : xor , "11011" : bitOr , "11100" : bitAnd , "11101" : invert , "11110" : compare , "11111" : jmp , "01100" : jlt , "01101" : jgt , "01111" : je , "01010" : halt}
+
+def dump():
+    print(f"{PC}", end = " ")
+    for i in range(len(RF)):
+        print(f"{RF[i]}", end = " ")
+    print()
+
+def main():
+    global PC
+    global RF
+    global HLTFLAG 
+    global MEM
+    with open("input.txt") as f:
+        MEM = f.readlines()
+    # while True:
+    #     try:
+    #         temp = input()
+    #         MEM.append(temp)
+    #     except EOFError:
+    #         break
+    # print(instructions)
+    while(not HLTFLAG):
+        inst = MEM[PC.value]
+        ExecuteEngine[inst[:5]](inst)
+        dump()
+        PC.value += 1
+        if PC.value >= len(MEM) :
+            HLTFLAG = True
+
+# HLTFLAG = False
+main()
