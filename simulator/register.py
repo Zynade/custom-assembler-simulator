@@ -1,5 +1,6 @@
 class Register:
-    def __init__(self, bits) -> None:
+    def __init__(self, name, bits) -> None:
+        self.name = name
         self.value = 0
         self.bits = bits
 
