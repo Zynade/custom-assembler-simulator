@@ -1,10 +1,10 @@
 const map = require('./map')
-// const fs = require('fs')
-// const FileI = fs.readFileSync('./assembler/input.txt', 'utf8')
-const rl = require('readline').createInterface({
-  input: process.stdin,
-  output: process.stdout
-})
+const fs = require('fs')
+const FileI = fs.readFileSync('./input.txt', 'utf8')
+// const rl = require('readline').createInterface({
+//   input: process.stdin,
+//   output: process.stdout
+// })
 const labels = {}
 const varArr = []
 const memSpace = {} // here if variables and labels are there in code then they will be stored
@@ -153,8 +153,8 @@ function checkVar (array, varName) {
   }
   return [false, 0]
 }
-function main (instructions) {
-  instructions = instructions.split('\n')
+function main () {
+  const instructions = FileI.split('\n')
   // let numInstructions
   let result
   let output = ''
@@ -187,15 +187,17 @@ function main (instructions) {
       output = ''
     }
   }
-  console.log(output)
+  fs.writeFileSync('output.txt', output)
 }
-let program = ''
-// console.log(processInstruction(''))
-rl.on('line', (input) => {
-  program += input + '\n'
-})
-rl.on('close', () => {
-  main(program)
-})
-// console.log(main(Program))
-module.exports = { processInstruction }
+// let program = ''
+// // console.log(processInstruction(''))
+// rl.on('line', (input) => {
+//   program += input + '\n'
+// })
+// rl.on('close', () => {
+//   main(program)
+// })
+// setTimeout(() => { rl.close() }, 1000)
+// // console.log(main(Program))
+// module.exports = { processInstruction }
+main()
