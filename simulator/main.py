@@ -83,14 +83,14 @@ def movIntermediate(inst) -> None:
     # print(f"Register {components[1]} is set to {RF[int(components[1],2)].value}")
 
 def rightShift(inst) -> None:
-    '''Perfoms the rightshift inst : r3 = r1 >> 45 if rs r1 45'''
+    '''Perfoms the rightshift inst : r1 = r1 >> 45 if rs r1 45'''
     components = typeB(inst)
     RF[int(components[1],2)].value = (RF[int(components[1],2)].value >> int(components[2], 2))
     if RF[int(components[1],2)].value > INT_MAX : 
         RF[int(components[1],2)].value %= INT_MAX
 
 def leftShift(inst) -> None:
-    '''Perfoms the leftshift inst : r3 = r1 << 45 if rs r1 45'''
+    '''Perfoms the leftshift inst : r1 = r1 << 45 if rs r1 45'''
     components = typeB(inst)
     RF[int(components[1],2)].value = (RF[int(components[1],2)].value << int(components[2], 2))
     if RF[int(components[1],2)].value > INT_MAX :
@@ -104,7 +104,7 @@ def movRegister(inst) -> None:
     RF[int(components[2],2)].value = RF[int(components[1],2)].value
 
 def divide(inst) -> None:
-    '''Perfoms the divide inst : r0 = r1 / r2 if div r1 r2 and r1 = r1 % r2'''
+    '''Perfoms the divide inst : r0 = r3 / r4 and r1 = r3 % r4 if div r3 r4'''
     components = typeC(inst)
     RF[0].value = (RF[int(components[1],2)].value // RF[int(components[2],2)].value)
     RF[1].value = (RF[int(components[1],2)].value % RF[int(components[2],2)].value)
@@ -152,7 +152,7 @@ def jlt(inst) -> None:
     global Jmpflag
     global JmpVal
     components = typeE(inst)
-    if getFlag(1) == 1:
+    if getFlag(2) == 1:
         JmpVal = int(components[1],2)
         Jmpflag = True
 
@@ -161,7 +161,7 @@ def jgt(inst) -> None:
     global Jmpflag
     global JmpVal
     components = typeE(inst)
-    if getFlag(2) == 1 :
+    if getFlag(1) == 1 :
         JmpVal = int(components[1],2)
         Jmpflag = True
     
