@@ -14,6 +14,7 @@ def typeC(inst) -> list:
     '''returns a list of inst and regs in type C format \n
         Type C format = [instruction,reg1,reg2]'''
     # Number of bits = Inst(5bits) + Unused(5) + Reg1(3) + Reg2(3)
+    # print(f"inst: {inst}")
     return [inst[0:5],inst[10:13],inst[13:16]]
 
 def typeD(inst) -> list:

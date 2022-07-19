@@ -5,22 +5,31 @@ import sys
 
 #Initialied all the registers in global context
 
-
+INT_MAX = 2**16 - 1
+INT_MIN = 0
 PC = Register("PC",8)
 RF = [Register(f"r{i}",16) for i in range(8)]
 RF[7].name = "FLAGS"
-HLTFLAG = False
+Hltflag = False
+Jmpflag = False
+JmpVal = PC.value
 
 # MEM = ""
 
 def setFlags(index, value) -> None:
     '''sets The flag for overflow(V), less than(L), greater than(G), equals(E). Also used to reset them \n
         index = 3 for V, 2 for L, 1 for G, 0 for E'''
-    tmp = bin(RF[7].value)[12:]
+    tmp = list(str(RF[7]))[12:]
     #done index abs(index - 3) because of we are storing wrt to LSB (given in guidelines) so it will be opposite of tradional indexing
     index = abs(index - 3)
     tmp[index] = str(value)
-    RF[7].value = int(tmp,2)
+    RF[7].value = int("".join(tmp),2)
+
+def getFlag(index) -> int:
+    '''Returns the value of the flag at index'''
+    index = abs(index - 3)
+    # print(f"The flag is {int(list(str(RF[7]))[12+index])}")
+    return int(list(str(RF[7]))[12+index])
 
 #Type A instructions
 
@@ -28,8 +37,10 @@ def add(inst) -> None:
     '''Perfoms the add inst : r3 = r2 + r1 if add r1 r2 r3'''
     components = typeA(inst)
     RF[int(components[3],2)].value = (RF[int(components[2],2)].value + RF[int(components[1],2)].value)
-    if RF[int(components[3],2)].value > 2*16 :
-        RF[int(components[3],2)].value %= 2*16
+    # print(f"The value of register {RF[int(components[3],2)].name} is {RF[int(components[3],2)].value}")
+    if RF[int(components[3],2)].value > INT_MAX :
+        # print(f"Overflow occured in add instruction. R3 = {RF[int(components[3],2)].value}")
+        RF[int(components[3],2)].value %= INT_MAX
         setFlags(3,1)
 
 def sub(inst) -> None:
@@ -44,8 +55,8 @@ def multiply(inst) -> None:
     '''Perfoms the mul inst : r3 = r2 * r1 if mul r1 r2 r3'''
     components = typeA(inst)
     RF[int(components[3],2)].value = (RF[int(components[2],2)].value * RF[int(components[1],2)].value)
-    if RF[int(components[3],2)].value > 2*16 :
-        RF[int(components[3],2)].value %= 2*16
+    if RF[int(components[3],2)].value > INT_MAX :
+        RF[int(components[3],2)].value %= INT_MAX
         setFlags(3,1)
 
 def xor(inst) -> None:
@@ -75,42 +86,44 @@ def rightShift(inst) -> None:
     '''Perfoms the rightshift inst : r3 = r1 >> 45 if rs r1 45'''
     components = typeB(inst)
     RF[int(components[1],2)].value = (RF[int(components[1],2)].value >> int(components[2], 2))
-    if RF[int(components[1],2)].value > 2*16 :
-        RF[int(components[1],2)].value %= 2*16
+    if RF[int(components[1],2)].value > INT_MAX : 
+        RF[int(components[1],2)].value %= INT_MAX
 
 def leftShift(inst) -> None:
     '''Perfoms the leftshift inst : r3 = r1 << 45 if rs r1 45'''
     components = typeB(inst)
     RF[int(components[1],2)].value = (RF[int(components[1],2)].value << int(components[2], 2))
-    if RF[int(components[1],2)].value > 2*16 :
-        RF[int(components[1],2)].value %= 2*16
+    if RF[int(components[1],2)].value > INT_MAX :
+        RF[int(components[1],2)].value %= INT_MAX
 
 #Type C instructions
 
 def movRegister(inst) -> None:
     '''Perfoms the mov inst : r3 = r2 if mov r2 r3'''
-    components = typeB(inst)
+    components = typeC(inst)
     RF[int(components[2],2)].value = RF[int(components[1],2)].value
 
 def divide(inst) -> None:
     '''Perfoms the divide inst : r0 = r1 / r2 if div r1 r2 and r1 = r1 % r2'''
-    components = typeB(inst)
+    components = typeC(inst)
     RF[0].value = (RF[int(components[1],2)].value // RF[int(components[2],2)].value)
     RF[1].value = (RF[int(components[1],2)].value % RF[int(components[2],2)].value)
 
 def invert(inst) -> None:
     '''Perfoms the invert inst : r3 = ~r1 if not r1 r3'''
-    components = typeB(inst)
+    components = typeC(inst)
     RF[int(components[2],2)].value = ~RF[int(components[1],2)].value
 
 def compare(inst) -> None:
     '''Perfoms the compare inst  if cmp r1 r2'''
-    components = typeB(inst)
+    components = typeC(inst)
+    # print(f"Comparing {components}")
     if RF[int(components[1],2)].value > RF[int(components[2],2)].value :
         setFlags(1,1)
     elif RF[int(components[1],2)].value < RF[int(components[2],2)].value :
         setFlags(2,1)
-    else :
+    elif RF[int(components[1],2)].value == RF[int(components[2],2)].value :
+        # print(f"{RF[int(components[1],2)].value} == {RF[int(components[2],2)].name}")
         setFlags(0,1)
 
 #Type D instructions
@@ -125,52 +138,72 @@ def store(inst) -> None:
 
 #Type E instructions
 def jmp(inst) -> None:
+    global Jmpflag
+    global JmpVal
     '''Perfoms the jmp inst : PC = 45 if jmp $45'''
-    components = typeB(inst)
-    PC.value = int(components[1],2)
+    components = typeE(inst)
+    JmpVal = int(components[1],2)
+    # print(f"PC is set to {PC.value}")
+    Jmpflag = True
+    # print(f"Jmpflag is set to {Jmpflag}")
 
 def jlt(inst) -> None:
     '''Perfoms the jlt inst : PC = 45 if jlt $45'''
-    pass
-    components = typeB(inst)
-    if getFlag(1) == 1 :
-        PC.value = int(components[1],2)
+    global Jmpflag
+    global JmpVal
+    components = typeE(inst)
+    if getFlag(1) == 1:
+        JmpVal = int(components[1],2)
+        Jmpflag = True
 
 def jgt(inst) -> None:
     '''Perfoms the jgt inst : PC = 45 if jgt $45'''
-    pass
-    components = typeB(inst)
+    global Jmpflag
+    global JmpVal
+    components = typeE(inst)
     if getFlag(2) == 1 :
-        PC.value = int(components[1],2)
+        JmpVal = int(components[1],2)
+        Jmpflag = True
     
 def je(inst) -> None:
     '''Perfoms the jle inst : PC = 45 if jle $45'''
-    pass
-    components = typeB(inst)
-    if getFlag(1) == 1 or getFlag(0) == 1 :
-        PC.value = int(components[1],2)
+    global Jmpflag
+    global JmpVal
+    components = typeE(inst)
+    # print(f"{getFlag(0)}")
+    if getFlag(0) == 1 :
+        # print(f"{getFlag(0)}")
+        JmpVal = int(components[1],2)
+        # print(f"PC is set to {PC.value}")
+        Jmpflag = True
 
 #type F instructions
 def halt(inst) -> None:
     '''Perfoms the halt inst : halt'''
+    global Hltflag
     components = typeF(inst)
-    HLTFLAG = True
+    Hltflag = True
 
 ExecuteEngine = {"10000" : add , "10001" : sub , "10010" : movIntermediate , "10011" : movRegister , "10100" : load , "10101" : store , "10110" : multiply , "10111" : divide , "11000" : rightShift , "11001" : leftShift , "11010" : xor , "11011" : bitOr , "11100" : bitAnd , "11101" : invert , "11110" : compare , "11111" : jmp , "01100" : jlt , "01101" : jgt , "01111" : je , "01010" : halt}
 
-def dump():
+def dump(f):
     print(f"{PC}", end = " ")
+    f.write(f"{PC.value} ")
     for i in range(len(RF)):
         print(f"{RF[i]}", end = " ")
+        f.write(f"{RF[i].value} ")
+    f.write("\n")
     print()
 
 def main():
     global PC
     global RF
-    global HLTFLAG 
+    global Hltflag 
     global MEM
-    with open("input.txt") as f:
-        MEM = f.readlines()
+    global Jmpflag
+    global JmpVal
+    # with open("input.txt") as f:
+        # MEM = f.readlines()
     # while True:
     #     try:
     #         temp = input()
@@ -178,13 +211,22 @@ def main():
     #     except EOFError:
     #         break
     # print(instructions)
-    while(not HLTFLAG):
-        inst = MEM[PC.value]
-        ExecuteEngine[inst[:5]](inst)
-        dump()
-        PC.value += 1
-        if PC.value >= len(MEM) :
-            HLTFLAG = True
+    MEM = sys.stdin.read()
+    MEM = MEM.split("\n")
+    with open("output.txt", "w") as f:
+            while(not Hltflag):
+                inst = MEM[PC.value]
+                ExecuteEngine[inst[:5]](inst)
+                dump(f)
+                # print(f"flag : {Jmpflag}")
+                if(Jmpflag):
+                    PC.value = JmpVal
+                else:
+                    PC.value += 1
+                Jmpflag = False
+                if PC.value >= len(MEM) :
+                    Hltflag = True
+                    print(f"Halt flag is set to {Hltflag}")
 
-# HLTFLAG = False
+# Hltflag = False
 main()

@@ -3,3 +3,5 @@ node_modules/
 assembler/input.txt
 assembler/output.txt
 simulator/__pycache__/
+simulator/input.txt
+simulator/output.txt
