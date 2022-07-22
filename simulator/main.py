@@ -13,17 +13,20 @@ RF[7].name = "FLAGS"
 Hltflag = False
 Jmpflag = False
 JmpVal = PC.value
+CMPflag = False
 
 # MEM = ""
 
 def setFlags(index, value) -> None:
     '''sets The flag for overflow(V), less than(L), greater than(G), equals(E). Also used to reset them \n
         index = 3 for V, 2 for L, 1 for G, 0 for E'''
+    global CMPflag
     tmp = list(str(RF[7]))[12:]
     #done index abs(index - 3) because of we are storing wrt to LSB (given in guidelines) so it will be opposite of tradional indexing
     index = abs(index - 3)
     tmp[index] = str(value)
     RF[7].value = int("".join(tmp),2)
+    CMPflag = True
 
 def getFlag(index) -> int:
     '''Returns the value of the flag at index'''
@@ -129,12 +132,18 @@ def compare(inst) -> None:
 #Type D instructions
 
 def load(inst) -> None:
-    '''Perfoms the load inst : r3 = $45 if load r3 $45'''
-    pass
+    '''Perfoms the load inst : r3 = MEM[45] if load r3 $45'''
+    global MEM
+    components = typeD(inst)
+    RF[int(components[1],2)].value = int(MEM[int(components[2],2)],2)
 
 def store(inst) -> None:
-    '''Perfoms the store inst : $45 = r3 if store r3 $45'''
-    pass
+    '''Perfoms the store inst : MEM[45] = r3 if store r3 $45'''
+    global MEM
+    components = typeD(inst)
+    if int(components[2],2) > len(MEM) - 1 :
+        MEM.extend(['0000000000000000'] * (int(components[2],2) - len(MEM) + 1))
+    MEM[int(components[2],2)] = bin(RF[int(components[1],2)].value)[2:].zfill(16)
 
 #Type E instructions
 def jmp(inst) -> None:
@@ -202,6 +211,7 @@ def main():
     global MEM
     global Jmpflag
     global JmpVal
+    global CMPflag
     # with open("input.txt") as f:
         # MEM = f.readlines()
     # while True:
@@ -213,20 +223,37 @@ def main():
     # print(instructions)
     MEM = sys.stdin.read()
     MEM = MEM.split("\n")
+    #the last input is EOF which is getting read by MEM so popping it incase of error
+    if MEM[-1] == "" :
+        MEM.pop()
+    # print(MEM)
     with open("output.txt", "w") as f:
-            while(not Hltflag):
-                inst = MEM[PC.value]
-                ExecuteEngine[inst[:5]](inst)
-                dump(f)
-                # print(f"flag : {Jmpflag}")
-                if(Jmpflag):
-                    PC.value = JmpVal
-                else:
-                    PC.value += 1
-                Jmpflag = False
-                if PC.value >= len(MEM) :
-                    Hltflag = True
-                    print(f"Halt flag is set to {Hltflag}")
+        while(not Hltflag):
+            inst = MEM[PC.value]
+            ExecuteEngine[inst[:5]](inst)
+            dump(f)
+            # print(f"flag : {Jmpflag}")
+            if(Jmpflag):
+                PC.value = JmpVal
+            else:
+                PC.value += 1
+            Jmpflag = False
+            if PC.value >= len(MEM) :
+                Hltflag = True
+                # print(f"Halt flag is set to {Hltflag}")
+            if(CMPflag):
+                CMPflag = False
+            else:
+                setFlags(0,0)
+                setFlags(1,0)
+                setFlags(2,0)
+                setFlags(3,0)
+        for i in range(len(MEM)):
+            print(f"{MEM[i]}")
+            f.write(f"{MEM[i]}\n")
+        for i in range(len(MEM),256):
+            print(f"0000000000000000")
+            f.write(f"{i}:empty\n")
 
 # Hltflag = False
 main()

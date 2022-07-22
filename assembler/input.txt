@@ -1,3 +1,4 @@
+var X
 mov R2 $5
 mov R1 $1
 mov R4 $1
@@ -10,5 +11,7 @@ add R3 R4 R3
 cmp R3 R2
 je exit
 jmp loop 
-exit: ls R1 $23
+exit: ls R1 $2
+st R1 X
+ld R3 X
 hlt
