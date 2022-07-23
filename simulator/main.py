@@ -1,6 +1,7 @@
 from utils import *
 from register import Register
 import sys
+import matplotlib.pyplot as plt
 # from sys import std
 
 #Initialied all the registers in global context
@@ -88,7 +89,7 @@ def movIntermediate(inst) -> None:
 def rightShift(inst) -> None:
     '''Perfoms the rightshift inst : r1 = r1 >> 45 if rs r1 45'''
     components = typeB(inst)
-    RF[int(components[1],2)].value = (RF[int(components[1],2)].value >> int(components[2], 2))
+    RF[int(components[1],2)].value = int((RF[int(components[1],2)].value >> int(components[2], 2)))
     if RF[int(components[1],2)].value > INT_MAX : 
         RF[int(components[1],2)].value %= INT_MAX
 
@@ -97,7 +98,7 @@ def leftShift(inst) -> None:
     components = typeB(inst)
     RF[int(components[1],2)].value = (RF[int(components[1],2)].value << int(components[2], 2))
     if RF[int(components[1],2)].value > INT_MAX :
-        RF[int(components[1],2)].value %= INT_MAX
+        RF[int(components[1],2)].value = 0
 
 #Type C instructions
 
@@ -115,7 +116,15 @@ def divide(inst) -> None:
 def invert(inst) -> None:
     '''Perfoms the invert inst : r3 = ~r1 if not r1 r3'''
     components = typeC(inst)
-    RF[int(components[2],2)].value = ~RF[int(components[1],2)].value
+    tmp = list(str(RF[int(components[1],2)]))
+    # print(tmp)
+    for i in range(len(tmp)):
+        if tmp[i] == "0":
+            tmp[i] = "1"
+        else:
+            tmp[i] = "0"
+    # print(tmp)
+    RF[int(components[1],2)].value = int("".join(tmp),2)
 
 def compare(inst) -> None:
     '''Perfoms the compare inst  if cmp r1 r2'''
@@ -135,7 +144,10 @@ def load(inst) -> None:
     '''Perfoms the load inst : r3 = MEM[45] if load r3 $45'''
     global MEM
     components = typeD(inst)
-    RF[int(components[1],2)].value = int(MEM[int(components[2],2)],2)
+    try:
+        RF[int(components[1],2)].value = int(MEM[int(components[2],2)],2)
+    except IndexError:
+        RF[int(components[1],2)].value = 0
 
 def store(inst) -> None:
     '''Perfoms the store inst : MEM[45] = r3 if store r3 $45'''
