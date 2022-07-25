@@ -15,6 +15,10 @@ Hltflag = False
 Jmpflag = False
 JmpVal = PC.value
 CMPflag = False
+t = 0
+Time = []
+MemoryAccessed = []
+
 
 # MEM = ""
 
@@ -143,19 +147,29 @@ def compare(inst) -> None:
 def load(inst) -> None:
     '''Perfoms the load inst : r3 = MEM[45] if load r3 $45'''
     global MEM
+    global Time
+    global MemoryAccessed
+    global t
+    Time.append(t)
     components = typeD(inst)
     try:
         RF[int(components[1],2)].value = int(MEM[int(components[2],2)],2)
     except IndexError:
         RF[int(components[1],2)].value = 0
+    MemoryAccessed.append(int(components[2],2))
 
 def store(inst) -> None:
     '''Perfoms the store inst : MEM[45] = r3 if store r3 $45'''
     global MEM
+    global Time
+    global MemoryAccessed
+    global t
+    Time.append(t)
     components = typeD(inst)
     if int(components[2],2) > len(MEM) - 1 :
-        MEM.extend(['0000000000000000'] * (int(components[2],2) - len(MEM) + 1))
+        MEM.extend(['0'*16] * (int(components[2],2) - len(MEM) + 1))
     MEM[int(components[2],2)] = bin(RF[int(components[1],2)].value)[2:].zfill(16)
+    MemoryAccessed.append(int(components[2],2))
 
 #Type E instructions
 def jmp(inst) -> None:
@@ -205,7 +219,28 @@ def halt(inst) -> None:
     components = typeF(inst)
     Hltflag = True
 
-ExecuteEngine = {"10000" : add , "10001" : sub , "10010" : movIntermediate , "10011" : movRegister , "10100" : load , "10101" : store , "10110" : multiply , "10111" : divide , "11000" : rightShift , "11001" : leftShift , "11010" : xor , "11011" : bitOr , "11100" : bitAnd , "11101" : invert , "11110" : compare , "11111" : jmp , "01100" : jlt , "01101" : jgt , "01111" : je , "01010" : halt}
+ExecuteEngine = {
+    "10000" : add ,
+    "10001" : sub ,
+    "10010" : movIntermediate ,
+    "10011" : movRegister ,
+    "10100" : load ,
+    "10101" : store ,
+    "10110" : multiply ,
+    "10111" : divide ,
+    "11000" : rightShift ,
+    "11001" : leftShift ,
+    "11010" : xor ,
+    "11011" : bitOr ,
+    "11100" : bitAnd , 
+    "11101" : invert , 
+    "11110" : compare , 
+    "11111" : jmp , 
+    "01100" : jlt , 
+    "01101" : jgt , 
+    "01111" : je , 
+    "01010" : halt
+}
 
 def dump(f):
     print(f"{PC}", end = " ")
@@ -224,15 +259,9 @@ def main():
     global Jmpflag
     global JmpVal
     global CMPflag
-    # with open("input.txt") as f:
-        # MEM = f.readlines()
-    # while True:
-    #     try:
-    #         temp = input()
-    #         MEM.append(temp)
-    #     except EOFError:
-    #         break
-    # print(instructions)
+    global Time
+    global MemoryAccessed
+    global t
     MEM = sys.stdin.read()
     MEM = MEM.split("\n")
     #the last input is EOF which is getting read by MEM so popping it incase of error
@@ -240,9 +269,19 @@ def main():
         MEM.pop()
     # print(MEM)
     with open("output.txt", "w") as f:
+        t = 1
         while(not Hltflag):
+            Time.append(t)
+            MemoryAccessed.append(PC.value)
             inst = MEM[PC.value]
             ExecuteEngine[inst[:5]](inst)
+            if(CMPflag):
+                CMPflag = False
+            else:
+                setFlags(0,0)
+                setFlags(1,0)
+                setFlags(2,0)
+                setFlags(3,0)
             dump(f)
             # print(f"flag : {Jmpflag}")
             if(Jmpflag):
@@ -253,19 +292,20 @@ def main():
             if PC.value >= len(MEM) :
                 Hltflag = True
                 # print(f"Halt flag is set to {Hltflag}")
-            if(CMPflag):
-                CMPflag = False
-            else:
-                setFlags(0,0)
-                setFlags(1,0)
-                setFlags(2,0)
-                setFlags(3,0)
+            t += 1
         for i in range(len(MEM)):
             print(f"{MEM[i]}")
             f.write(f"{MEM[i]}\n")
         for i in range(len(MEM),256):
-            print(f"0000000000000000")
+            print("0"*16)
             f.write(f"{i}:empty\n")
+    # print(f"Time taken : {Time}")
+    # print(f"Memory accessed : {MemoryAccessed}")
+    plt.scatter(x=Time,y=MemoryAccessed)
+    plt.xlabel("Time")
+    plt.ylabel("Memory accessed")
+    plt.title("Memory accessed vs time")
+    plt.show()
 
 # Hltflag = False
 main()
