@@ -108,6 +108,10 @@ def optest(instruction):
             return opcode[temp]['binaryeq'][res]
 
 def immDecToBin(imm):
+    # Convert an immediate value to binary.
+
+    # TODO: If imm is a float, parse it as per Q3 requirements. Currently, the program throws an errror if it encounters a float.
+
     imm = int(imm[1:])
     if imm > 255 or imm < 0 or math.isnan(imm):
         return -1

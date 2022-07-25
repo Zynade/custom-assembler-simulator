@@ -9,7 +9,7 @@ varArr = []
 
 def processInstruction(instruction):
     binary = ''
-    instruction = instruction.split(' ')
+    instruction = instruction.split()
     operation  = instruction[0]
     for i in range(len(operation)):
         
@@ -26,8 +26,17 @@ def processInstruction(instruction):
     
     if instruction[0] == 'hlt':
         return -1
+    if instruction[0] == 'ld' or instruction[0] == 'st':
+        if instruction[-1] in labels:
+            raise Exception(f'Invalid argument for mem_addr at line {errorLineNumber}')
+
+    if instruction[0] in ['jmp', 'jlt', 'jgt', 'je']:
+        for var in varArr:
+            if instruction[-1] in var:
+                raise Exception(f"Invalid argument for mem_addr at line {errorLineNumber}")
+            
     if instruction[0] not in map.opcode:
-        raise Exception(f'Encountered a OP code not supported by the ISA at line number {errorLineNumber}')
+        raise Exception(f'Encountered an op code not supported by the ISA at line number {errorLineNumber}')
     ISA = map.opcode[operation]['verify'](instruction)
     if ISA > -1:
         binary += map.opcode[operation]['binaryeq'][ISA]
@@ -96,8 +105,7 @@ def preProcessInstruction(instructions):     #, labels, varArr
                     raise Exception(f'Variable name is not allowed at line number {errorLineNumber}')
                 if variable in varArr:
                     raise Exception(f'Variable already declared at line number {errorLineNumber}')
-                variables = {}
-                variables[variable] = lineNumber
+                variables = {variable: lineNumber}
                 varArr.append(variables)
         else:
             areVarsDeclared = True
@@ -135,11 +143,12 @@ def main(instructions): #,labels, varArr, memSpace
             output = ''
     return output
 
-
-try :
-    instructions = sys.stdin.read()
-    instructions = instructions.split('\n')
-    output = main(instructions)
-    sys.stdout.write(output)
-except Exception as e:
-    print(e)
+if __name__ == "__main__":
+    try:
+        instructions = sys.stdin.read()
+        instructions = instructions.split('\n')
+        instructions = [line for line in instructions if not (line.isspace() or line == '')]
+        output = main(instructions)
+        sys.stdout.write(output)
+    except Exception as e:
+        print(e)
