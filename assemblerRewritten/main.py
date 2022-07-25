@@ -26,7 +26,7 @@ def processInstruction(instruction):
     
     if instruction[0] == 'hlt':
         return -1
-    if map.opcode[instruction[0]] == None:
+    if instruction[0] not in map.opcode:
         raise Exception(f'Encountered a OP code not supported by the ISA at line number {errorLineNumber}')
     ISA = map.opcode[operation]['verify'](instruction)
     if ISA > -1:
@@ -41,14 +41,14 @@ def processInstruction(instruction):
             binary += map.registers[instruction[i]]
         else:
             raise Exception(f'Encountered a register not supported by the ISA at line number {errorLineNumber}')
-
-    if map.registers[instruction[len(instruction)-1]] != None:
+    
+    if instruction[len(instruction)-1] in map.registers:
         binary += map.registers[instruction[len(instruction)-1]]
     elif instruction[len(instruction)-1] in varArr:
         binary += memSpace[instruction[len(instruction)-1]]
     elif instruction[len(instruction)-1] in memSpace:
         binary += memSpace[instruction[len(instruction)-1]]
-    elif instruction[len(instruction)-1]=='$':
+    elif instruction[len(instruction)-1][0]=='$':
         imm = map.immDecToBin(instruction[len(instruction)-1])
         if imm == -1:
             raise Exception(f'Encountered an invalid immediate value at line number {errorLineNumber}')
@@ -77,12 +77,14 @@ def preProcessInstruction(instructions):     #, labels, varArr
                 instruction = instruction[i+1:]
                 labels[label] = lineNumber
                 break
+        if instruction == '':
+            continue
         instruction = instruction.split()
         if instruction[0] == 'hlt':
             hlt += 1
             if hlt > 1:
                 raise Exception(f'More than one HLT instruction found at line number {errorLineNumber}')
-            continue
+            # continue
         if instruction[0] == 'var':
             if areVarsDeclared:
                 raise Exception(f'Variable must be declared before any other instruction at line number {errorLineNumber}')
