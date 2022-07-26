@@ -18,7 +18,7 @@ def processInstruction(instruction):
 
         if operation[i] == ':':
             if len(instruction) == 1:
-                return ''
+                raise Exception(f'invalid label command found at line number {errorLineNumber}')
             label = operation[:i]
             instruction = instruction[1:]
             operation = instruction[0]
