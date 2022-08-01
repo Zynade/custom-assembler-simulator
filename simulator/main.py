@@ -1,7 +1,7 @@
 from utils import *
 from register import Register
 import sys
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 # from sys import std
 
 #Initialied all the registers in global context
@@ -244,12 +244,15 @@ ExecuteEngine = {
 
 def dump(f):
     print(f"{PC}", end = " ")
-    f.write(f"{PC.value} ")
-    for i in range(len(RF)):
+    # f.write(f"{PC.value} ")
+    f.write(f"{PC} ")
+    for i in range(len(RF)-1):
         print(f"{RF[i]}", end = " ")
-        f.write(f"{RF[i].value} ")
+        f.write(f"{RF[i]} ")
+    print(f"{RF[len(RF)-1]}")
+    f.write(f"{RF[len(RF)-1]}")
     f.write("\n")
-    print()
+    # print()
 
 def main():
     global PC
@@ -264,8 +267,10 @@ def main():
     global t
     MEM = sys.stdin.read()
     MEM = MEM.split("\n")
+    # with open("input.txt") as f:
+    #     MEM = f.read().split("\n")
     #the last input is EOF which is getting read by MEM so popping it incase of error
-    if MEM[-1] == "" :
+    while MEM[-1] == "" or MEM[-1] == "\n":
         MEM.pop()
     # print(MEM)
     with open("output.txt", "w") as f:
@@ -293,19 +298,20 @@ def main():
                 Hltflag = True
                 # print(f"Halt flag is set to {Hltflag}")
             t += 1
+        MEM.extend(['0'*16] * (256 - len(MEM)))
         for i in range(len(MEM)):
             print(f"{MEM[i]}")
             f.write(f"{MEM[i]}\n")
-        for i in range(len(MEM),256):
-            print("0"*16)
-            f.write(f"{i}:empty\n")
+        # f.write("0"*16 + "\n")
+    # print("0"*16)
+    # print()
     # print(f"Time taken : {Time}")
     # print(f"Memory accessed : {MemoryAccessed}")
-    plt.scatter(x=Time,y=MemoryAccessed)
-    plt.xlabel("Time")
-    plt.ylabel("Memory accessed")
-    plt.title("Memory accessed vs time")
-    plt.show()
+    # plt.scatter(x=Time,y=MemoryAccessed)
+    # plt.xlabel("Time")
+    # plt.ylabel("Memory accessed")
+    # plt.title("Memory accessed vs time")
+    # plt.show()
 
 # Hltflag = False
 main()
