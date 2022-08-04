@@ -128,7 +128,7 @@ def invert(inst) -> None:
         else:
             tmp[i] = "0"
     # print(tmp)
-    RF[int(components[1],2)].value = int("".join(tmp),2)
+    RF[int(components[2],2)].value = int("".join(tmp),2)
 
 def compare(inst) -> None:
     '''Perfoms the compare inst  if cmp r1 r2'''
