@@ -1,7 +1,7 @@
 from utils import *
 from register import Register
 import sys
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 # from sys import std
 
 #Initialied all the registers in global context
@@ -46,9 +46,9 @@ def add(inst) -> None:
     components = typeA(inst)
     RF[int(components[3],2)].value = (RF[int(components[2],2)].value + RF[int(components[1],2)].value)
     # print(f"The value of register {RF[int(components[3],2)].name} is {RF[int(components[3],2)].value}")
-    if RF[int(components[3],2)].value > INT_MAX:
+    if RF[int(components[3],2)].value > INT_MAX :
         # print(f"Overflow occured in add instruction. R3 = {RF[int(components[3],2)].value}")
-        RF[int(components[3],2)].value %= (INT_MAX + 1)
+        RF[int(components[3],2)].value %= INT_MAX
         setFlags(3,1)
 
 def sub(inst) -> None:
@@ -128,7 +128,7 @@ def invert(inst) -> None:
         else:
             tmp[i] = "0"
     # print(tmp)
-    RF[int(components[2],2)].value = int("".join(tmp),2)
+    RF[int(components[1],2)].value = int("".join(tmp),2)
 
 def compare(inst) -> None:
     '''Perfoms the compare inst  if cmp r1 r2'''
@@ -244,15 +244,12 @@ ExecuteEngine = {
 
 def dump(f):
     print(f"{PC}", end = " ")
-    # f.write(f"{PC.value} ")
-    f.write(f"{PC} ")
-    for i in range(len(RF)-1):
+    f.write(f"{PC.value} ")
+    for i in range(len(RF)):
         print(f"{RF[i]}", end = " ")
-        f.write(f"{RF[i]} ")
-    print(f"{RF[len(RF)-1]}")
-    f.write(f"{RF[len(RF)-1]}")
+        f.write(f"{RF[i].value} ")
     f.write("\n")
-    # print()
+    print()
 
 def main():
     global PC
@@ -267,10 +264,8 @@ def main():
     global t
     MEM = sys.stdin.read()
     MEM = MEM.split("\n")
-    # with open("input.txt") as f:
-    #     MEM = f.read().split("\n")
     #the last input is EOF which is getting read by MEM so popping it incase of error
-    while MEM[-1] == "" or MEM[-1] == "\n":
+    if MEM[-1] == "" :
         MEM.pop()
     # print(MEM)
     with open("output.txt", "w") as f:
@@ -298,20 +293,19 @@ def main():
                 Hltflag = True
                 # print(f"Halt flag is set to {Hltflag}")
             t += 1
-        MEM.extend(['0'*16] * (256 - len(MEM)))
         for i in range(len(MEM)):
             print(f"{MEM[i]}")
             f.write(f"{MEM[i]}\n")
-        # f.write("0"*16 + "\n")
-    # print("0"*16)
-    # print()
+        for i in range(len(MEM),256):
+            print("0"*16)
+            f.write(f"{i}:empty\n")
     # print(f"Time taken : {Time}")
     # print(f"Memory accessed : {MemoryAccessed}")
-    # plt.scatter(x=Time,y=MemoryAccessed)
-    # plt.xlabel("Time")
-    # plt.ylabel("Memory accessed")
-    # plt.title("Memory accessed vs time")
-    # plt.show()
+    plt.scatter(x=Time,y=MemoryAccessed)
+    plt.xlabel("Time")
+    plt.ylabel("Memory accessed")
+    plt.title("Memory accessed vs time")
+    plt.show()
 
 # Hltflag = False
 main()

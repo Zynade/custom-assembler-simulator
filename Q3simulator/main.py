@@ -8,6 +8,8 @@ import sys
 
 INT_MAX = 2**16 - 1
 INT_MIN = 0
+FLOAT_MAX = 252.0
+FLOAT_MIN = 1.0
 PC = Register("PC",8)
 RF = [Register(f"r{i}",16) for i in range(8)]
 RF[7].name = "FLAGS"
@@ -19,8 +21,20 @@ t = 0
 Time = []
 MemoryAccessed = []
 
-
 # MEM = ""
+
+def ieeeToFloat(float_num):
+    # Parse an IEEE floating point number to it's corresponding decimal representation
+    if len(float_num) != 16:
+        return
+    exp = int(float_num[8:11], 2)
+    mant = float_num[11:]
+    result = 0
+    for i in range(len(mant)):
+        if mant[i] == '1':
+            result += (1/2)**(i+1)
+    result = (1 + result) * (2 ** exp)
+    return float(result)
 
 def setFlags(index, value) -> None:
     '''sets The flag for overflow(V), less than(L), greater than(G), equals(E). Also used to reset them \n
@@ -41,15 +55,43 @@ def getFlag(index) -> int:
 
 #Type A instructions
 
+def addf(inst) -> None:
+    '''Perfoms the addf inst : r3 = r2 + r1 if addf r1 r2 r3'''
+    components = typeA(inst)
+    RF[int(components[3],2)].value = (RF[int(components[1],2)].value + RF[int(components[2],2)].value)
+    tmp = RF[int(components[3],2)].value
+    if tmp != ieeeToFloat(RF[int(components[3],2)].floatTOIEE()):
+        # print(f"Overflow occured in addf instruction. R3 = {RF[int(components[3],2)].value}")
+        RF[int(components[3],2)].value = FLOAT_MAX
+        setFlags(3,1)
+    if RF[int(components[3],2)].value > FLOAT_MAX :
+        RF[int(components[3],2)].value = FLOAT_MAX
+        setFlags(3,1)
+    
+
 def add(inst) -> None:
     '''Perfoms the add inst : r3 = r2 + r1 if add r1 r2 r3'''
     components = typeA(inst)
     RF[int(components[3],2)].value = (RF[int(components[2],2)].value + RF[int(components[1],2)].value)
     # print(f"The value of register {RF[int(components[3],2)].name} is {RF[int(components[3],2)].value}")
-    if RF[int(components[3],2)].value > INT_MAX:
+    if RF[int(components[3],2)].value > INT_MAX :
         # print(f"Overflow occured in add instruction. R3 = {RF[int(components[3],2)].value}")
-        RF[int(components[3],2)].value %= (INT_MAX + 1)
+        RF[int(components[3],2)].value %= (INT_MAX+1)
         setFlags(3,1)
+
+def subf(inst) -> None:
+    '''Perfoms the subf inst : r3 = r2 - r1 if subf r1 r2 r3'''
+    components = typeA(inst)
+    RF[int(components[3],2)].value = (RF[int(components[2],2)].value - RF[int(components[1],2)].value)
+    if RF[int(components[3],2)].value < 0 :
+        RF[int(components[3],2)].value = FLOAT_MIN
+        setFlags(3,1)
+    tmp = RF[int(components[3],2)].value
+    if tmp != ieeeToFloat(RF[int(components[3],2)].floatTOIEE()):
+        # print(f"Overflow occured in addf instruction. R3 = {RF[int(components[3],2)].value}")
+        RF[int(components[3],2)].value = FLOAT_MAX
+        setFlags(3,1)
+    
 
 def sub(inst) -> None:
     '''Perfoms the sub inst : r3 = r1 - r2 if sub r1 r2 r3'''
@@ -64,7 +106,7 @@ def multiply(inst) -> None:
     components = typeA(inst)
     RF[int(components[3],2)].value = (RF[int(components[2],2)].value * RF[int(components[1],2)].value)
     if RF[int(components[3],2)].value > INT_MAX :
-        RF[int(components[3],2)].value %= INT_MAX
+        RF[int(components[3],2)].value %= (INT_MAX+1)
         setFlags(3,1)
 
 def xor(inst) -> None:
@@ -84,6 +126,14 @@ def bitOr(inst) -> None:
 
 #Type B instructions
 
+def movf(inst) -> None:
+    '''Perfoms the mov inst : r3 = 45.0 if mov r3 $45.0'''
+    components = typeB(inst)
+    RF[int(components[1],2)].value = ieeeToFloat(components[2].zfill(16))
+    if RF[int(components[1],2)].value > FLOAT_MAX :
+        RF[int(components[1],2)].value = 0
+        setFlags(3,1)
+
 def movIntermediate(inst) -> None:
     '''Perfoms the mov inst : r3 = 45 if mov r3 $45'''
     components = typeB(inst)
@@ -95,7 +145,7 @@ def rightShift(inst) -> None:
     components = typeB(inst)
     RF[int(components[1],2)].value = int((RF[int(components[1],2)].value >> int(components[2], 2)))
     if RF[int(components[1],2)].value > INT_MAX : 
-        RF[int(components[1],2)].value %= INT_MAX
+        RF[int(components[1],2)].value %= (INT_MAX+1)
 
 def leftShift(inst) -> None:
     '''Perfoms the leftshift inst : r1 = r1 << 45 if rs r1 45'''
@@ -222,6 +272,9 @@ def halt(inst) -> None:
 ExecuteEngine = {
     "10000" : add ,
     "10001" : sub ,
+    "00000" : addf ,
+    "00001" : subf ,
+    "00010" : movf ,
     "10010" : movIntermediate ,
     "10011" : movRegister ,
     "10100" : load ,
@@ -244,15 +297,12 @@ ExecuteEngine = {
 
 def dump(f):
     print(f"{PC}", end = " ")
-    # f.write(f"{PC.value} ")
-    f.write(f"{PC} ")
-    for i in range(len(RF)-1):
+    f.write(f"{PC.value} ")
+    for i in range(len(RF)):
         print(f"{RF[i]}", end = " ")
-        f.write(f"{RF[i]} ")
-    print(f"{RF[len(RF)-1]}")
-    f.write(f"{RF[len(RF)-1]}")
+        f.write(f"{RF[i].value} ")
     f.write("\n")
-    # print()
+    print()
 
 def main():
     global PC
@@ -266,9 +316,7 @@ def main():
     global MemoryAccessed
     global t
     MEM = sys.stdin.read()
-    MEM = MEM.split("\n")
-    # with open("input.txt") as f:
-    #     MEM = f.read().split("\n")
+    MEM = MEM.split("\n")   
     #the last input is EOF which is getting read by MEM so popping it incase of error
     while MEM[-1] == "" or MEM[-1] == "\n":
         MEM.pop()
@@ -298,13 +346,12 @@ def main():
                 Hltflag = True
                 # print(f"Halt flag is set to {Hltflag}")
             t += 1
-        MEM.extend(['0'*16] * (256 - len(MEM)))
         for i in range(len(MEM)):
             print(f"{MEM[i]}")
             f.write(f"{MEM[i]}\n")
-        # f.write("0"*16 + "\n")
-    # print("0"*16)
-    # print()
+        for i in range(len(MEM),256):
+            print("0"*16)
+            f.write(f"{i}:{'0'*16}\n")
     # print(f"Time taken : {Time}")
     # print(f"Memory accessed : {MemoryAccessed}")
     # plt.scatter(x=Time,y=MemoryAccessed)

@@ -45,3 +45,13 @@ def verifyTypeF(instruction):
     if len(instruction)==1:
         return 0
     return -1
+
+def verify_F_Add_Sub(instruction):
+    if len(instruction)==4:
+        return 0
+    return -1
+
+def verifyMovF(instruction):
+    if len(instruction)==3 and instruction[2][0] == '$':
+        return 0
+    return -1

@@ -7,6 +7,7 @@ def get_addr_pins(mem_space, cell_size):
     return addr_len
 
 def solve_q1(mem_space, cell_size):
+    print("\nQ1:\n-----------------\n")
     if cell_size == 0:
         cell_size = 16
     instr_len = int(input("Instruction length in bits: "))
@@ -18,9 +19,12 @@ def solve_q1(mem_space, cell_size):
     opcode_len = instr_len - addr_len - reg_len
     filler_bits = instr_len - opcode_len - 2 * reg_len
 
-    max_num_of_instr = mem_space_in_bits // instr_len
-    max_num_of_reg = mem_space_in_bits // reg_len
+    # max_num_of_instr = mem_space_in_bits // instr_len
+    max_num_of_instr = 2 ** (opcode_len)
+    # max_num_of_reg = mem_space_in_bits // reg_len
+    max_num_of_reg = 2 ** (reg_len)
 
+    print("---------OUTPUT--------")
     print("Minimum bits needed to represent an address:", addr_len)
     print("Number of bits needed by opcode: ", opcode_len)
     print("Number of filler bits in instruction type 2: ", filler_bits)
@@ -29,7 +33,7 @@ def solve_q1(mem_space, cell_size):
     
 
 def solve_q2_type1(mem_space, cell_size):
-
+    print("\nQ2, Type 1 queries:\n-----------------\n")
     # Type 1 queries:
     cpu_bits = int(input("Number of bits in CPU: "))
     if cell_size == 0:
@@ -57,11 +61,12 @@ def solve_q2_type1(mem_space, cell_size):
 
     change_in_pins = get_addr_pins(mem_space, new_cell_size) - get_addr_pins(mem_space, cell_size)
     if change_in_pins < 0:
-        print("Pins saved: ", -change_in_pins)
+        print("Pins saved:", -change_in_pins, f"(i.e. {change_in_pins} pins.)")
     else:
         print("Extra pins required: ", change_in_pins)
 
 def solve_q2_type2():
+    print("\nQ2, Type 2 queries:\n-----------------\n")
     cpu_bits = int(input("Number of bits in CPU: "))
     addr_pins = int(input("Number of address pins: "))
     print("How is the memory addressed?")
@@ -83,7 +88,23 @@ def solve_q2_type2():
         return
 
     mem_size_in_bytes = cell_size * (2 ** (addr_pins - 3))
-    print(f"The main memory can be {mem_size_in_bytes} bytes.") 
+    exponent = math.log2(mem_size_in_bytes)
+    coefficient = exponent % 10
+    unit = (exponent - coefficient) / 10
+    if unit == 0:
+        unit = 'B'
+    elif unit == 1:
+        unit = 'K'
+    elif unit == 2:
+        unit = 'M'
+    elif unit == 3:
+        unit = 'G'
+    elif unit == 4:
+        unit = 'T'
+    elif unit == 5:
+        unit = 'P'
+
+    print(f"Main memory size: {2 ** coefficient} {unit}B.")
 
 def get_mem_space_in_bits(mem_space):
     num, unit = mem_space.split()
@@ -98,6 +119,8 @@ def get_mem_space_in_bits(mem_space):
             bits *= 1024 * 1024
         elif unit[0].upper() == 'G':
             bits *= 1024 * 1024 * 1024
+        elif unit[0].upper() == 'T':
+            bits *= 1024 * 1024 * 1024 * 1024
     return int(num) * bits
 
 
