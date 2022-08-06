@@ -48,9 +48,21 @@ opcode = {
         'verify' : verify.verifyTypeB ,
         'binaryeq': ['11001']
     },
+    'addf' : {
+        'verify' : verify.verify_F_Add_Sub ,
+        'binaryeq': ['00000']
+    },
+    'subf' : {
+        'verify' : verify.verify_F_Add_Sub ,
+        'binaryeq' : ['00001']
+    },
+    'movf' : {
+        'verify' : verify.verifyMovF ,
+        'binaryeq' : ['00010']
+    },
     'div': {
-    'verify': verify.verifyTypeC,
-    'binaryeq': ['1011100000']
+        'verify': verify.verifyTypeC,
+        'binaryeq': ['1011100000']
     },
     'not': {
         'verify': verify.verifyTypeC,
@@ -118,3 +130,29 @@ def immDecToBin(imm):
     imm = bin(imm)[2:]
     imm = imm.zfill(8)
     return imm
+
+def immediateToFloatingPoint(imm):
+    # Convert an immediate value to floating point.
+    totalSize = 8
+    imm = imm[1:]
+    intNumber, floatNumber = imm.split('.')
+    floatNumber = float('0.'+floatNumber)
+    intBinary = bin(int(intNumber))[2:]
+    totalSize -= len(intBinary)
+    # convert floating part to binary
+    floatingBinary = ''
+    while floatNumber != 0:
+        if len(floatingBinary) > totalSize:
+            return -1
+        floatNumber = floatNumber * 2
+        if floatNumber >= 1:
+            floatingBinary += '1'
+            floatNumber -= 1
+        else:
+            floatingBinary += '0'
+    mentisa = intBinary[1:] + floatingBinary
+    exponent = len(intBinary[1:])
+    while len(mentisa) < 5:
+        mentisa += '0'
+    finalBinary = bin(exponent)[2:].zfill(3) + mentisa
+    return finalBinary
