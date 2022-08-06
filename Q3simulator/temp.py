@@ -33,7 +33,7 @@ def float_to_decimal(float_num):
     result = (1 + result) * (2 ** exp)
     return float(result)
 
-a = floatTOIEEE(252.0)
+a = floatTOIEEE(1.03125)
 print(a)
 # print(1.5 + 0.5)
-print(float_to_decimal(a))
+print(float_to_decimal("0000000000100000"))

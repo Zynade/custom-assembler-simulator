@@ -21,7 +21,6 @@ t = 0
 Time = []
 MemoryAccessed = []
 
-
 # MEM = ""
 
 def ieeeToFloat(float_num):
@@ -60,9 +59,15 @@ def addf(inst) -> None:
     '''Perfoms the addf inst : r3 = r2 + r1 if addf r1 r2 r3'''
     components = typeA(inst)
     RF[int(components[3],2)].value = (RF[int(components[1],2)].value + RF[int(components[2],2)].value)
+    tmp = RF[int(components[3],2)].value
+    if tmp != ieeeToFloat(RF[int(components[3],2)].floatTOIEE()):
+        # print(f"Overflow occured in addf instruction. R3 = {RF[int(components[3],2)].value}")
+        RF[int(components[3],2)].value = FLOAT_MAX
+        setFlags(3,1)
     if RF[int(components[3],2)].value > FLOAT_MAX :
         RF[int(components[3],2)].value = FLOAT_MAX
         setFlags(3,1)
+    
 
 def add(inst) -> None:
     '''Perfoms the add inst : r3 = r2 + r1 if add r1 r2 r3'''
@@ -81,6 +86,12 @@ def subf(inst) -> None:
     if RF[int(components[3],2)].value < 0 :
         RF[int(components[3],2)].value = FLOAT_MIN
         setFlags(3,1)
+    tmp = RF[int(components[3],2)].value
+    if tmp != ieeeToFloat(RF[int(components[3],2)].floatTOIEE()):
+        # print(f"Overflow occured in addf instruction. R3 = {RF[int(components[3],2)].value}")
+        RF[int(components[3],2)].value = FLOAT_MAX
+        setFlags(3,1)
+    
 
 def sub(inst) -> None:
     '''Perfoms the sub inst : r3 = r1 - r2 if sub r1 r2 r3'''
@@ -118,7 +129,7 @@ def bitOr(inst) -> None:
 def movf(inst) -> None:
     '''Perfoms the mov inst : r3 = 45.0 if mov r3 $45.0'''
     components = typeB(inst)
-    RF[int(components[1],2)].value = ieeeToFloat(components[2])
+    RF[int(components[1],2)].value = ieeeToFloat(components[2].zfill(16))
     if RF[int(components[1],2)].value > FLOAT_MAX :
         RF[int(components[1],2)].value = 0
         setFlags(3,1)

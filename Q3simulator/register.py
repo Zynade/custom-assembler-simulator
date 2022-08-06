@@ -12,7 +12,7 @@ class Register:
             return temp.zfill(self.bits)
         if type(self.value) == float:
             # print(f"{self.name} : {temp.zfill(self.bits)}")
-            return self.floatTOIEE(self.value)
+            return self.floatTOIEE()
 
     def floatTOIEE(self)->str:
         '''Converts a float to given assignment format'''
@@ -32,7 +32,7 @@ class Register:
                 Fractionstring += '0'
             n += 1
         Floatstring = Intstring + Fractionstring
-        exponent = len(Intstring)-1
+        exponent = bin(len(Intstring)-1)[2:]
         Mantissa = Floatstring[1:6]
         return (exponent + Mantissa).zfill(16)
 
