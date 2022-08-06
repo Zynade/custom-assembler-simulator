@@ -18,8 +18,10 @@ def solve_q1(mem_space, cell_size):
     opcode_len = instr_len - addr_len - reg_len
     filler_bits = instr_len - opcode_len - 2 * reg_len
 
-    max_num_of_instr = mem_space_in_bits // instr_len
-    max_num_of_reg = mem_space_in_bits // reg_len
+    # max_num_of_instr = mem_space_in_bits // instr_len
+    max_num_of_instr = 2 ** (opcode_len)
+    # max_num_of_reg = mem_space_in_bits // reg_len
+    max_num_of_reg = 2 ** (reg_len)
 
     print("Minimum bits needed to represent an address:", addr_len)
     print("Number of bits needed by opcode: ", opcode_len)

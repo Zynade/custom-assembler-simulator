@@ -46,9 +46,9 @@ def add(inst) -> None:
     components = typeA(inst)
     RF[int(components[3],2)].value = (RF[int(components[2],2)].value + RF[int(components[1],2)].value)
     # print(f"The value of register {RF[int(components[3],2)].name} is {RF[int(components[3],2)].value}")
-    if RF[int(components[3],2)].value > INT_MAX :
+    if RF[int(components[3],2)].value > INT_MAX:
         # print(f"Overflow occured in add instruction. R3 = {RF[int(components[3],2)].value}")
-        RF[int(components[3],2)].value %= INT_MAX
+        RF[int(components[3],2)].value %= (INT_MAX + 1)
         setFlags(3,1)
 
 def sub(inst) -> None:
