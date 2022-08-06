@@ -1,15 +1,15 @@
 from utils import *
 from register import Register
 import sys
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 # from sys import std
 
 #Initialied all the registers in global context
 
 INT_MAX = 2**16 - 1
 INT_MIN = 0
-FLOAT_MAX = 252
-FLOAT_MIN = 1
+FLOAT_MAX = 252.0
+FLOAT_MIN = 1.0
 PC = Register("PC",8)
 RF = [Register(f"r{i}",16) for i in range(8)]
 RF[7].name = "FLAGS"
@@ -61,7 +61,7 @@ def addf(inst) -> None:
     components = typeA(inst)
     RF[int(components[3],2)].value = (RF[int(components[1],2)].value + RF[int(components[2],2)].value)
     if RF[int(components[3],2)].value > FLOAT_MAX :
-        RF[int(components[3],2)].value = 0
+        RF[int(components[3],2)].value = FLOAT_MAX
         setFlags(3,1)
 
 def add(inst) -> None:
@@ -71,7 +71,7 @@ def add(inst) -> None:
     # print(f"The value of register {RF[int(components[3],2)].name} is {RF[int(components[3],2)].value}")
     if RF[int(components[3],2)].value > INT_MAX :
         # print(f"Overflow occured in add instruction. R3 = {RF[int(components[3],2)].value}")
-        RF[int(components[3],2)].value %= INT_MAX
+        RF[int(components[3],2)].value %= (INT_MAX+1)
         setFlags(3,1)
 
 def subf(inst) -> None:
@@ -79,7 +79,7 @@ def subf(inst) -> None:
     components = typeA(inst)
     RF[int(components[3],2)].value = (RF[int(components[2],2)].value - RF[int(components[1],2)].value)
     if RF[int(components[3],2)].value < 0 :
-        RF[int(components[3],2)].value = 0
+        RF[int(components[3],2)].value = FLOAT_MIN
         setFlags(3,1)
 
 def sub(inst) -> None:
@@ -95,7 +95,7 @@ def multiply(inst) -> None:
     components = typeA(inst)
     RF[int(components[3],2)].value = (RF[int(components[2],2)].value * RF[int(components[1],2)].value)
     if RF[int(components[3],2)].value > INT_MAX :
-        RF[int(components[3],2)].value %= INT_MAX
+        RF[int(components[3],2)].value %= (INT_MAX+1)
         setFlags(3,1)
 
 def xor(inst) -> None:
@@ -134,7 +134,7 @@ def rightShift(inst) -> None:
     components = typeB(inst)
     RF[int(components[1],2)].value = int((RF[int(components[1],2)].value >> int(components[2], 2)))
     if RF[int(components[1],2)].value > INT_MAX : 
-        RF[int(components[1],2)].value %= INT_MAX
+        RF[int(components[1],2)].value %= (INT_MAX+1)
 
 def leftShift(inst) -> None:
     '''Perfoms the leftshift inst : r1 = r1 << 45 if rs r1 45'''
@@ -167,7 +167,7 @@ def invert(inst) -> None:
         else:
             tmp[i] = "0"
     # print(tmp)
-    RF[int(components[1],2)].value = int("".join(tmp),2)
+    RF[int(components[2],2)].value = int("".join(tmp),2)
 
 def compare(inst) -> None:
     '''Perfoms the compare inst  if cmp r1 r2'''
@@ -305,9 +305,9 @@ def main():
     global MemoryAccessed
     global t
     MEM = sys.stdin.read()
-    MEM = MEM.split("\n")
+    MEM = MEM.split("\n")   
     #the last input is EOF which is getting read by MEM so popping it incase of error
-    if MEM[-1] == "" :
+    while MEM[-1] == "" or MEM[-1] == "\n":
         MEM.pop()
     # print(MEM)
     with open("output.txt", "w") as f:
@@ -340,7 +340,7 @@ def main():
             f.write(f"{MEM[i]}\n")
         for i in range(len(MEM),256):
             print("0"*16)
-            f.write(f"{i}:empty\n")
+            f.write(f"{i}:{'0'*16}\n")
     # print(f"Time taken : {Time}")
     # print(f"Memory accessed : {MemoryAccessed}")
     # plt.scatter(x=Time,y=MemoryAccessed)
