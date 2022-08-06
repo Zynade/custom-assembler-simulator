@@ -152,9 +152,12 @@ def immediateToFloatingPoint(imm):
             floatNumber -= 1
         else:
             floatingBinary += '0'
-    mentisa = intBinary[1:] + floatingBinary
+    mentisa = (intBinary + floatingBinary)[1:6]
+    for i in range(6,len(mentisa)):
+        if mentisa[i] == '1':
+            return -1
     exponent = len(intBinary[1:])
     while len(mentisa) < 5:
         mentisa += '0'
-    finalBinary = bin(exponent)[2:].zfill(3) + mentisa
-    return finalBinary
+    finalBinary = (bin(exponent)[2:] + mentisa)
+    return finalBinary.zfill(8)
