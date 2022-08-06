@@ -133,8 +133,10 @@ def immDecToBin(imm):
 
 def immediateToFloatingPoint(imm):
     # Convert an immediate value to floating point.
-    totalSize = 8
+    totalSize = 6
     imm = imm[1:]
+    if (float(imm) < 1):
+        return -1
     intNumber, floatNumber = imm.split('.')
     floatNumber = float('0.'+floatNumber)
     intBinary = bin(int(intNumber))[2:]
