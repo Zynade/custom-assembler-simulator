@@ -153,6 +153,9 @@ def immediateToFloatingPoint(imm):
         else:
             floatingBinary += '0'
     mentisa = (intBinary + floatingBinary)[1:6]
+    for i in range(6,len(mentisa)):
+        if mentisa[i] == '1':
+            return -1
     exponent = len(intBinary[1:])
     while len(mentisa) < 5:
         mentisa += '0'
