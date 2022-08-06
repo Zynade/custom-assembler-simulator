@@ -50,11 +50,11 @@ opcode = {
     },
     'addf' : {
         'verify' : verify.verify_F_Add_Sub ,
-        'binaryeq': ['00000']
+        'binaryeq': ['0000000']
     },
     'subf' : {
         'verify' : verify.verify_F_Add_Sub ,
-        'binaryeq' : ['00001']
+        'binaryeq' : ['0000100']
     },
     'movf' : {
         'verify' : verify.verifyMovF ,
