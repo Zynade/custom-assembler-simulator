@@ -5,3 +5,6 @@ assembler/output.txt
 simulator/__pycache__/
 simulator/input.txt
 simulator/output.txt
+Q3simulator/__pycache__/
+Q3simulator/input.txt
+Q3simulator/output.txt

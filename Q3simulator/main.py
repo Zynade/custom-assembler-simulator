@@ -24,6 +24,19 @@ MemoryAccessed = []
 
 # MEM = ""
 
+def ieeeToFloat(float_num):
+    # Parse an IEEE floating point number to it's corresponding decimal representation
+    if len(float_num) != 16:
+        return
+    exp = int(float_num[8:11], 2)
+    mant = float_num[11:]
+    result = 0
+    for i in range(len(mant)):
+        if mant[i] == '1':
+            result += (1/2)**(i+1)
+    result = (1 + result) * (2 ** exp)
+    return float(result)
+
 def setFlags(index, value) -> None:
     '''sets The flag for overflow(V), less than(L), greater than(G), equals(E). Also used to reset them \n
         index = 3 for V, 2 for L, 1 for G, 0 for E'''
@@ -45,7 +58,7 @@ def getFlag(index) -> int:
 
 def addf(inst) -> None:
     '''Perfoms the addf inst : r3 = r2 + r1 if addf r1 r2 r3'''
-    components = typeC(inst)
+    components = typeA(inst)
     RF[int(components[3],2)].value = (RF[int(components[1],2)].value + RF[int(components[2],2)].value)
     if RF[int(components[3],2)].value > FLOAT_MAX :
         RF[int(components[3],2)].value = 0
@@ -63,7 +76,7 @@ def add(inst) -> None:
 
 def subf(inst) -> None:
     '''Perfoms the subf inst : r3 = r2 - r1 if subf r1 r2 r3'''
-    components = typeC(inst)
+    components = typeA(inst)
     RF[int(components[3],2)].value = (RF[int(components[2],2)].value - RF[int(components[1],2)].value)
     if RF[int(components[3],2)].value < 0 :
         RF[int(components[3],2)].value = 0
@@ -103,11 +116,11 @@ def bitOr(inst) -> None:
 #Type B instructions
 
 def movf(inst) -> None:
-    '''Perfoms the movf inst : r3 = r1 if movf r1 r3'''
-    components = typeF(inst)
-    RF[int(components[3],2)].value = RF[int(components[1],2)].value
-    if RF[int(components[3],2)].value > FLOAT_MAX :
-        RF[int(components[3],2)].value = 0
+    '''Perfoms the mov inst : r3 = 45.0 if mov r3 $45.0'''
+    components = typeB(inst)
+    RF[int(components[1],2)].value = ieeeToFloat(components[2])
+    if RF[int(components[1],2)].value > FLOAT_MAX :
+        RF[int(components[1],2)].value = 0
         setFlags(3,1)
 
 def movIntermediate(inst) -> None:
