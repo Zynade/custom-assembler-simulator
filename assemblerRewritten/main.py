@@ -58,11 +58,17 @@ def processInstruction(instruction):
     elif instruction[len(instruction)-1] in memSpace:
         binary += memSpace[instruction[len(instruction)-1]]
     elif instruction[len(instruction)-1][0]=='$':
-        imm = map.immDecToBin(instruction[len(instruction)-1])
-        if imm == -1:
-            raise Exception(f'Encountered an invalid immediate value at line number {errorLineNumber}')
+        if operation == 'movf':
+            floatingBinary =  map.immediateToFloatingPoint(instruction[len(instruction)-1])
+            if floatingBinary == -1:
+                raise Exception(f'Invalid immediate value at line number {errorLineNumber}')
+            binary += floatingBinary
         else:
-            binary += imm
+            imm = map.immDecToBin(instruction[len(instruction)-1])
+            if imm == -1:
+                raise Exception(f'Encountered an invalid immediate value at line number {errorLineNumber}')
+            else:
+                binary += imm
     else:
         raise Exception(f'Encountered an invalid intruction at line number {errorLineNumber}')
     return binary
