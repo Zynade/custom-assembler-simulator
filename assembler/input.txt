@@ -10,5 +10,5 @@ add R3 R4 R3
 cmp R3 R2
 je exit
 jmp loop 
-exit: ls R1 $23
+exit: ls R1 $2
 hlt

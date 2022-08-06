@@ -1,6 +1,7 @@
 from utils import *
 from register import Register
 import sys
+# import matplotlib.pyplot as plt
 # from sys import std
 
 #Initialied all the registers in global context
@@ -13,17 +14,24 @@ RF[7].name = "FLAGS"
 Hltflag = False
 Jmpflag = False
 JmpVal = PC.value
+CMPflag = False
+t = 0
+Time = []
+MemoryAccessed = []
+
 
 # MEM = ""
 
 def setFlags(index, value) -> None:
     '''sets The flag for overflow(V), less than(L), greater than(G), equals(E). Also used to reset them \n
         index = 3 for V, 2 for L, 1 for G, 0 for E'''
+    global CMPflag
     tmp = list(str(RF[7]))[12:]
     #done index abs(index - 3) because of we are storing wrt to LSB (given in guidelines) so it will be opposite of tradional indexing
     index = abs(index - 3)
     tmp[index] = str(value)
     RF[7].value = int("".join(tmp),2)
+    CMPflag = True
 
 def getFlag(index) -> int:
     '''Returns the value of the flag at index'''
@@ -85,7 +93,7 @@ def movIntermediate(inst) -> None:
 def rightShift(inst) -> None:
     '''Perfoms the rightshift inst : r1 = r1 >> 45 if rs r1 45'''
     components = typeB(inst)
-    RF[int(components[1],2)].value = (RF[int(components[1],2)].value >> int(components[2], 2))
+    RF[int(components[1],2)].value = int((RF[int(components[1],2)].value >> int(components[2], 2)))
     if RF[int(components[1],2)].value > INT_MAX : 
         RF[int(components[1],2)].value %= INT_MAX
 
@@ -94,7 +102,7 @@ def leftShift(inst) -> None:
     components = typeB(inst)
     RF[int(components[1],2)].value = (RF[int(components[1],2)].value << int(components[2], 2))
     if RF[int(components[1],2)].value > INT_MAX :
-        RF[int(components[1],2)].value %= INT_MAX
+        RF[int(components[1],2)].value = 0
 
 #Type C instructions
 
@@ -112,7 +120,15 @@ def divide(inst) -> None:
 def invert(inst) -> None:
     '''Perfoms the invert inst : r3 = ~r1 if not r1 r3'''
     components = typeC(inst)
-    RF[int(components[2],2)].value = ~RF[int(components[1],2)].value
+    tmp = list(str(RF[int(components[1],2)]))
+    # print(tmp)
+    for i in range(len(tmp)):
+        if tmp[i] == "0":
+            tmp[i] = "1"
+        else:
+            tmp[i] = "0"
+    # print(tmp)
+    RF[int(components[2],2)].value = int("".join(tmp),2)
 
 def compare(inst) -> None:
     '''Perfoms the compare inst  if cmp r1 r2'''
@@ -129,12 +145,31 @@ def compare(inst) -> None:
 #Type D instructions
 
 def load(inst) -> None:
-    '''Perfoms the load inst : r3 = $45 if load r3 $45'''
-    pass
+    '''Perfoms the load inst : r3 = MEM[45] if load r3 $45'''
+    global MEM
+    global Time
+    global MemoryAccessed
+    global t
+    Time.append(t)
+    components = typeD(inst)
+    try:
+        RF[int(components[1],2)].value = int(MEM[int(components[2],2)],2)
+    except IndexError:
+        RF[int(components[1],2)].value = 0
+    MemoryAccessed.append(int(components[2],2))
 
 def store(inst) -> None:
-    '''Perfoms the store inst : $45 = r3 if store r3 $45'''
-    pass
+    '''Perfoms the store inst : MEM[45] = r3 if store r3 $45'''
+    global MEM
+    global Time
+    global MemoryAccessed
+    global t
+    Time.append(t)
+    components = typeD(inst)
+    if int(components[2],2) > len(MEM) - 1 :
+        MEM.extend(['0'*16] * (int(components[2],2) - len(MEM) + 1))
+    MEM[int(components[2],2)] = bin(RF[int(components[1],2)].value)[2:].zfill(16)
+    MemoryAccessed.append(int(components[2],2))
 
 #Type E instructions
 def jmp(inst) -> None:
@@ -184,16 +219,40 @@ def halt(inst) -> None:
     components = typeF(inst)
     Hltflag = True
 
-ExecuteEngine = {"10000" : add , "10001" : sub , "10010" : movIntermediate , "10011" : movRegister , "10100" : load , "10101" : store , "10110" : multiply , "10111" : divide , "11000" : rightShift , "11001" : leftShift , "11010" : xor , "11011" : bitOr , "11100" : bitAnd , "11101" : invert , "11110" : compare , "11111" : jmp , "01100" : jlt , "01101" : jgt , "01111" : je , "01010" : halt}
+ExecuteEngine = {
+    "10000" : add ,
+    "10001" : sub ,
+    "10010" : movIntermediate ,
+    "10011" : movRegister ,
+    "10100" : load ,
+    "10101" : store ,
+    "10110" : multiply ,
+    "10111" : divide ,
+    "11000" : rightShift ,
+    "11001" : leftShift ,
+    "11010" : xor ,
+    "11011" : bitOr ,
+    "11100" : bitAnd , 
+    "11101" : invert , 
+    "11110" : compare , 
+    "11111" : jmp , 
+    "01100" : jlt , 
+    "01101" : jgt , 
+    "01111" : je , 
+    "01010" : halt
+}
 
 def dump(f):
     print(f"{PC}", end = " ")
-    f.write(f"{PC.value} ")
-    for i in range(len(RF)):
+    # f.write(f"{PC.value} ")
+    f.write(f"{PC} ")
+    for i in range(len(RF)-1):
         print(f"{RF[i]}", end = " ")
-        f.write(f"{RF[i].value} ")
+        f.write(f"{RF[i]} ")
+    print(f"{RF[len(RF)-1]}")
+    f.write(f"{RF[len(RF)-1]}")
     f.write("\n")
-    print()
+    # print()
 
 def main():
     global PC
@@ -202,31 +261,57 @@ def main():
     global MEM
     global Jmpflag
     global JmpVal
-    # with open("input.txt") as f:
-        # MEM = f.readlines()
-    # while True:
-    #     try:
-    #         temp = input()
-    #         MEM.append(temp)
-    #     except EOFError:
-    #         break
-    # print(instructions)
+    global CMPflag
+    global Time
+    global MemoryAccessed
+    global t
     MEM = sys.stdin.read()
     MEM = MEM.split("\n")
+    # with open("input.txt") as f:
+    #     MEM = f.read().split("\n")
+    #the last input is EOF which is getting read by MEM so popping it incase of error
+    while MEM[-1] == "" or MEM[-1] == "\n":
+        MEM.pop()
+    # print(MEM)
     with open("output.txt", "w") as f:
-            while(not Hltflag):
-                inst = MEM[PC.value]
-                ExecuteEngine[inst[:5]](inst)
-                dump(f)
-                # print(f"flag : {Jmpflag}")
-                if(Jmpflag):
-                    PC.value = JmpVal
-                else:
-                    PC.value += 1
-                Jmpflag = False
-                if PC.value >= len(MEM) :
-                    Hltflag = True
-                    print(f"Halt flag is set to {Hltflag}")
+        t = 1
+        while(not Hltflag):
+            Time.append(t)
+            MemoryAccessed.append(PC.value)
+            inst = MEM[PC.value]
+            ExecuteEngine[inst[:5]](inst)
+            if(CMPflag):
+                CMPflag = False
+            else:
+                setFlags(0,0)
+                setFlags(1,0)
+                setFlags(2,0)
+                setFlags(3,0)
+            dump(f)
+            # print(f"flag : {Jmpflag}")
+            if(Jmpflag):
+                PC.value = JmpVal
+            else:
+                PC.value += 1
+            Jmpflag = False
+            if PC.value >= len(MEM) :
+                Hltflag = True
+                # print(f"Halt flag is set to {Hltflag}")
+            t += 1
+        MEM.extend(['0'*16] * (256 - len(MEM)))
+        for i in range(len(MEM)):
+            print(f"{MEM[i]}")
+            f.write(f"{MEM[i]}\n")
+        # f.write("0"*16 + "\n")
+    # print("0"*16)
+    # print()
+    # print(f"Time taken : {Time}")
+    # print(f"Memory accessed : {MemoryAccessed}")
+    # plt.scatter(x=Time,y=MemoryAccessed)
+    # plt.xlabel("Time")
+    # plt.ylabel("Memory accessed")
+    # plt.title("Memory accessed vs time")
+    # plt.show()
 
 # Hltflag = False
 main()
